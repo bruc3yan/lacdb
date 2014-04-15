@@ -1,0 +1,82 @@
+/*
+ *
+ * Additional Custom CSS
+ * 
+ * 
+ * Author:  Bruce Yan
+ * Updated: April 2014
+ * Notes:	Used in conjunction with bootstrap.css
+ * 
+ */
+
+
+/* --------------------------------------
+   Layout
+   -------------------------------------- */
+footer {
+   background: #333;
+   color: #eee;
+   font-size: 11px;
+   padding: 20px;
+}
+
+
+/* --------------------------------------
+   Typography
+   -------------------------------------- */
+body {
+   -webkit-font-smoothing: antialiased;
+   text-rendering: optimizelegibility;
+}
+
+
+/* --------------------------------------
+   Navbar
+   -------------------------------------- */
+#searchItemInput {
+   width: 200px;
+}
+   
+   
+/* --------------------------------------
+   Carousel
+   -------------------------------------- */
+
+
+
+/* --------------------------------------
+   Global Styles
+   -------------------------------------- */
+
+
+
+/* --------------------------------------
+   Media Queries
+   -------------------------------------- */
+
+/* Portrait & landscape phone */
+@media (max-width: 480px) {
+/*   #mainOverdues {
+      padding-left:15px;
+      padding-right:15px;
+   }*/
+}
+
+/* Landscape phone to portrait tablet */
+@media (max-width: 768px) {
+/*   #mainOverdues {
+      padding-left:15px;
+      padding-right:15px;
+   }*/
+}
+
+/* Large desktop */
+@media (min-width: 1200px) {
+	
+}
+
+/*Fix for avoiding the top header to overlap content*/
+body { padding-top: 40px; }
+/*@media screen and (max-width: 768px) {
+    body { padding-top: 30px; }
+}*/
