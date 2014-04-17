@@ -1,3 +1,18 @@
+<?php
+/*
+ *
+ * Index page File
+ * 
+ * 
+ * Author:  Bruce Yan
+ * Updated: April 2014
+ * Notes:	Main page for loading all other pages
+ * 
+ */
+
+include 'includes/functions.php';
+
+?>
 <!DOCTYPE html>
 
 <html lang="en">
@@ -16,9 +31,7 @@
 			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
 			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 		<![endif]-->
-		
-
-		
+				
 		<!-- Bootstrap CSS -->
 		<link href="includes/css/bootstrap.min.css" rel="stylesheet">
 		
@@ -34,34 +47,26 @@
 	
 	<div class="container" id="main">
 
-		<?php //include('includes/header.php'); ?>
-
-		<?php
-		// Navigation
-	    include('includes/header.php'); 
-
-	    $page = isset($_GET['page']) ? trim(strtolower($_GET['page'])) : "main";
-
-	    $allowedPages = array(
-	        'main'     => './main.php',
-	        'checkin'    => './checkin.php',
-	        'checkout' => './checkout.php',
-	        'lostandfound'  => './lostandfound.php',
-	        'profile'   => './profile.php',
-	        'manageusers'   => './manageusers.php',
-	        'logout'  => './logout.php'
-	    );
-
-  	  	include( isset($allowedPages[$page]) ? $allowedPages[$page] : $allowedPages["main"] );
-
-    	include('includes/footer.php');
+		<?php 
+			//Header 
+			include('includes/header.php'); 
 		?>
 
-		<?php //include('main.php'); ?>		
+		<?php			
+			// main body content
+			$body = new Navigation($_GET['page']);
+			
+			include $body->fetchPage();
+		?>
+
 
 	</div> <!-- end main container -->
 
-	<?php //include('includes/footer.php'); ?>
+	<?php 
+		// Footer is included outside of the main container div
+		// because we want it to stretch across the entire bottom
+		include('includes/footer.php'); 
+	?>
 
 	<!-- Google Analytics code -->
 	<?php include_once("analyticstracking.php") ?>

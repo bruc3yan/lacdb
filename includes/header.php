@@ -22,7 +22,7 @@
 
 
 		<a class="navbar-brand" href="./"><img src="images/logo.png" alt="LAC Database"></a>
-
+<?php //$page == 'main' ? echo ' class="active">' : echo '>' ?>
 		<div class="navbar-collapse collapse" id="navbar-collapse-1">
 			<ul class="nav navbar-nav">
 				<li class="active">
