@@ -34,13 +34,34 @@
 	
 	<div class="container" id="main">
 
-		<?php include('includes/header.php'); ?>
+		<?php //include('includes/header.php'); ?>
 
-		<?php include('main.php'); ?>		
+		<?php
+		// Navigation
+	    include('includes/header.php'); 
+
+	    $page = isset($_GET['page']) ? trim(strtolower($_GET['page'])) : "main";
+
+	    $allowedPages = array(
+	        'main'     => './main.php',
+	        'checkin'    => './checkin.php',
+	        'checkout' => './checkout.php',
+	        'lostandfound'  => './lostandfound.php',
+	        'profile'   => './profile.php',
+	        'manageusers'   => './manageusers.php',
+	        'logout'  => './logout.php'
+	    );
+
+  	  	include( isset($allowedPages[$page]) ? $allowedPages[$page] : $allowedPages["main"] );
+
+    	include('includes/footer.php');
+		?>
+
+		<?php //include('main.php'); ?>		
 
 	</div> <!-- end main container -->
 
-	<?php include('includes/footer.php'); ?>
+	<?php //include('includes/footer.php'); ?>
 
 	<!-- Google Analytics code -->
 	<?php include_once("analyticstracking.php") ?>
