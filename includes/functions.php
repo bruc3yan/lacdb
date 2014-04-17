@@ -164,7 +164,7 @@ class Records {
     	// Print all items in database 
     	// 	rentid		bikeid		sname		sid		waiver		dateout		
     	//  keyreturnedto		datein		status		latedays		paidcollectedby		notes											
-        $stmt = $this->db->prepare('SELECT rentid, bikeid, sname, sid, waiver, dateout, keyreturnedto, datein, status, latedays, paidcollectedby, notes FROM mudderbikerentals ORDER BY rentid ASC');
+        $stmt = $this->db->prepare('SELECT rentid, bikeid, sname, sid, waiver, dateout, keyreturnedto, datein, status, latedays, paidcollectedby, notes FROM mudderbikerentals ORDER BY rentid DESC');
         $stmt->execute();
         $stmt->bind_result($rentid, $bikeid, $sname, $sid, $waiver, $dateout, $keyreturnedto, $datein, $status, $latedays, $paidcollectedby, $notes);
         $stmt->store_result(); // store result set into buffer
