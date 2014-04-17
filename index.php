@@ -12,6 +12,9 @@
 
 include 'includes/functions.php';
 
+// Checks to see if the global page is set
+$page = (isset($_GET['page']) ? $_GET['page'] : 'main');
+
 ?>
 <!DOCTYPE html>
 
@@ -54,7 +57,7 @@ include 'includes/functions.php';
 
 		<?php			
 			// main body content
-			$body = new Navigation($_GET['page']);
+			$body = new Navigation($page);
 			
 			include $body->fetchPage();
 		?>
