@@ -24,7 +24,7 @@
 	 			// create a new instance of the Records class
 				$record = new Records;
 				// list all the rentals in tabular format
-				$record->listMudderBikeRentals(0);
+				$record->listMudderBikeRentals(0, 1);
 			?>
 	 	</div> <!-- end col 12 -->
 	 </div> <!-- end row inmudderbikes -->

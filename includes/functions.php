@@ -160,10 +160,10 @@ class Records {
         $stmt->close();
     }
 
-    function listMudderBikeRentals($json) {
+    function listMudderBikeRentals($json, $edit) {
     	// Print all items in database 
-    	// 	rentid		bikeid		sname		sid		waiver		dateout		
-    	//  keyreturnedto		datein		status		latedays		paidcollectedby		notes											
+    	// 	json = 1 means skip the table output but just display json script
+    	//  edit = 1 means certain boxes appear for editing										
         $stmt = $this->db->prepare('SELECT rentid, bikeid, sname, sid, waiver, dateout, keyreturnedto, datein, status, latedays, paidcollectedby, notes FROM mudderbikerentals ORDER BY rentid DESC');
         $stmt->execute();
         $stmt->bind_result($rentid, $bikeid, $sname, $sid, $waiver, $dateout, $keyreturnedto, $datein, $status, $latedays, $paidcollectedby, $notes);

@@ -11,7 +11,7 @@
  */
 
 // Checks to see if the global page is set
-$page = (isset($_GET['page']) ? $_GET['page'] : 'main');
+$page = (isset($_GET['page']) ? htmlentities($_GET['page']) : 'main');
 
 ?>
 
