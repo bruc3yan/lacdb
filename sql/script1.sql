@@ -20,9 +20,10 @@ USE zonkey;
 # Lost Table
 
 
-# Mudder Bike data
-DROP TABLE IF EXISTS mudderbikedata2;
-CREATE TABLE mudderbikedata2 (
+# Mudder Bike data - DO NOT RUN THE FOLLOWING, all good.
+/*
+DROP TABLE IF EXISTS mudderbikedata;
+CREATE TABLE mudderbikedata (
 	bikeid INTEGER NOT NULL AUTO_INCREMENT,
 	available VARCHAR(64) NOT NULL,
 	notes VARCHAR(256), 
@@ -30,6 +31,8 @@ CREATE TABLE mudderbikedata2 (
 	dateofdeath DATE,
 	PRIMARY KEY (bikeid)
 );
+*/
+
 /*
 # Products: relation that gives the mfg, model number, type of products
 CREATE TABLE Products (
