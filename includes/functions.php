@@ -241,5 +241,60 @@ class Records {
     }
 } //end Records
 
+class Users {
+    private $db;
+
+    // Constructor - opens DB connection
+	function __construct() {
+		if (!$this->db instanceof mysqli) {
+			$this->db = new mysqli('mysql.claremontbooks.com', 'byaz', 'Zonkey9387!$', 'zonkey');
+        	$this->db->autocommit(FALSE);
+		}
+		
+  	    if ($this->db->connect_errno) {
+    	   	printf("Connection failed: %s \n", $this->db->connect_error);
+			exit();
+		}
+    }
+
+    // Destructor - close DB connection
+    function __destruct() {
+        $this->db->close();
+    }
+
+     // Check if the user input valid login information
+    function checkLoginInfo($inputEmail, $inputPassword) {
+        // Prepare to access
+        $tempEmail = $this->db->escape_string($inputEmail);
+        $tempPassword = $this->db->escape_string($inputPassword);
+        $salt1 = "lacdb";
+        $salt2 = "rocks!";
+        $tempPasswordCombined = $salt1.$tempPassword.$salt2;
+
+
+        $rehashedPassword = hash('sha256', $tempPasswordCombined);
+       
+        // Search for matching email and password in database
+        $stmt = $this->db->prepare('SELECT uid, level, name, email, password, profile, FROM Users WHERE email = ? AND password = ?');
+        $stmt->bind_param("ss", $tempEmail, $rehashedPassword);
+        $stmt->execute();
+        $stmt->bind_result($userid, $level, $name, $email, $password, $profile);
+        $stmt->fetch();
+
+        if($rehashedPassword == $password) {
+            return array('uid' => $userid, 
+            			'level' => $level, 
+            			'name' => $name, 
+            			'email' => $email, 
+            			'password' => $password, 
+            			'profile' => $profile
+        				);
+        } else {
+            return NULL;
+        }
+    }
+
+}
+
 
 ?>
