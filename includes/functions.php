@@ -161,11 +161,17 @@ class Records {
         $stmt->close();
     }
 
-    function listMudderBikeRentals($json, $edit) {
+    function listMudderBikeRentals($json, $edit, $history) {
     	// Print all items in database 
     	// 	json = 1 means skip the table output but just display json script
-    	//  edit = 1 means certain boxes appear for editing										
-        $stmt = $this->db->prepare('SELECT rentid, bikeid, sname, sid, waiver, dateout, keyreturnedto, datein, status, latedays, paidcollectedby, notes FROM mudderbikerentals WHERE status NOT LIKE \'%return%\' ORDER BY rentid DESC');
+    	//  edit = 1 means certain boxes appear for editing		
+    	//  history = 1 means display all returned bikes, 0 means display currently unreturned bikes
+    	
+    	if ($history == 1)
+    		$stmt = $this->db->prepare('SELECT rentid, bikeid, sname, sid, waiver, dateout, keyreturnedto, datein, status, latedays, paidcollectedby, notes FROM mudderbikerentals WHERE (status LIKE \'%return%\' OR status LIKE \'%late%\')ORDER BY rentid DESC');
+    	else 
+    		$stmt = $this->db->prepare('SELECT rentid, bikeid, sname, sid, waiver, dateout, keyreturnedto, datein, status, latedays, paidcollectedby, notes FROM mudderbikerentals WHERE (status NOT LIKE \'%return%\' AND status NOT LIKE \'%late%\') ORDER BY rentid DESC');	
+
         $stmt->execute();
         $stmt->bind_result($rentid, $bikeid, $sname, $sid, $waiver, $dateout, $keyreturnedto, $datein, $status, $latedays, $paidcollectedby, $notes);
         $stmt->store_result(); // store result set into buffer
@@ -263,10 +269,11 @@ class Users {
         $this->db->close();
     }
 
-    // Check for existing user
-    //function 
+    // Check for existing user for registering (TO DO)
 
     // Check if the user input valid login information
+    // sha256 hash calculator for "lacdb123456rocks!"
+    // http://www.xorbin.com/tools/sha256-hash-calculator
     function checkLoginInfo($inputEmail, $inputPassword) {
         // Prepare to access
         $tempEmail = $this->db->escape_string($inputEmail);

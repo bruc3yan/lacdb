@@ -10,7 +10,8 @@
  * 
  */
 
-header("Location: index.php");
+header("Location: ./");
+/*
 
 include 'includes/functions.php';
 
@@ -99,7 +100,7 @@ session_start();
         die("Redirecting to index.php"); 
     } 
 
-
+*/
  ?>
  <form action="register.php" method="post"> 
     <label>Username:</label> 
