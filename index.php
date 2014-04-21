@@ -12,6 +12,34 @@
 
 include 'includes/functions.php';
 
+session_start(); 
+
+// New authentication
+$auth = new Users; 
+
+// Check to see if we came from login page OR if we're logged in (see below this section)
+if (!empty($_POST))	{ 
+	// if we got here through a form, then we grab the values and check with our database
+	$email = htmlentities($_POST['email']);
+	$password = htmlentities($_POST['password']);
+
+	// store array into users for checking later
+	$user = $auth->checkLoginInfo($email, $password);
+	// Check the return type of users
+	if($user != NULL) {
+	    $_SESSION['user'] = $user['uid'];
+
+	    header("Location: ./");
+	} else {
+	    header("Location: login.php");
+	}
+}
+
+// If logged in:
+if(isset($_SESSION['user'])) 
+
+{
+
 // Checks to see if the global page is set
 $page = (isset($_GET['page']) ? $_GET['page'] : 'main');
 
@@ -89,3 +117,11 @@ $page = (isset($_GET['page']) ? $_GET['page'] : 'main');
 	</body>
 </html>
 
+<?php
+// Otherwise if not logged in, redirect to Login page!
+
+} //end if
+else {
+	header("Location: login.php");
+}
+?>

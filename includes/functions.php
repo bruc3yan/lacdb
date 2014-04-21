@@ -57,6 +57,7 @@ class Navigation {
 	        'lostandfound' => './lostandfound.php',
 	        'profile' => './profile.php',
 	        'manageusers' => './manageusers.php',
+	        'login' => './login.php',
 	        'logout' => './logout.php'
 		);
 	}
@@ -262,7 +263,10 @@ class Users {
         $this->db->close();
     }
 
-     // Check if the user input valid login information
+    // Check for existing user
+    //function 
+
+    // Check if the user input valid login information
     function checkLoginInfo($inputEmail, $inputPassword) {
         // Prepare to access
         $tempEmail = $this->db->escape_string($inputEmail);
@@ -275,7 +279,7 @@ class Users {
         $rehashedPassword = hash('sha256', $tempPasswordCombined);
        
         // Search for matching email and password in database
-        $stmt = $this->db->prepare('SELECT uid, level, name, email, password, profile, FROM Users WHERE email = ? AND password = ?');
+        $stmt = $this->db->prepare('SELECT uid, level, name, email, password, profile FROM users WHERE email = ? AND password = ?');
         $stmt->bind_param("ss", $tempEmail, $rehashedPassword);
         $stmt->execute();
         $stmt->bind_result($userid, $level, $name, $email, $password, $profile);
