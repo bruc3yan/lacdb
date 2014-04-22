@@ -9,7 +9,6 @@
  * Notes:	Modular check in page file
  * 
  */
-
  ?>
 <div class="page-header">
 	<h2>Mudder Bikes <small>Check in.</small></h2>
