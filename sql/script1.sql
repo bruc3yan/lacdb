@@ -5,7 +5,7 @@
  * E-mail: byan@hmc.edu, azhou@hmc.edu
  * 
  * To connect to SQL database, follow the steps below:
- *     1. SSH into yaddazonkey@ryhme.dreamhost.com, navigate to sql folder
+ *     1. SSH into yaddazonkey@claremontbooks.com, navigate to sql folder
  *     2. mysql -u byaz -p -h mysql.claremontbooks.com zonkey 
  *     3. Enter your root password first (if prompted)
  *     4. Enter byaz's password, which is: Zonkey9387!$
@@ -32,6 +32,21 @@ CREATE TABLE mudderbikedata (
 	PRIMARY KEY (bikeid)
 );
 */
+
+/* Property owners' table:
+ *
+ */
+
+ DROP TABLE IF EXISTS owners;
+ CREATE TABLE owners (
+ 	name VARCHAR(256) NOT NULL,
+ 	ownerid INT NOT NULL,
+ 	description VARCHAR(256),
+ 	contactName VARCHAR(256),
+ 	contactNum VARCHAR(64),
+ 	contactEmail VARCHAR(256),
+ 	PRIMARY KEY (ownerid)
+ );
 
 /*
 # Products: relation that gives the mfg, model number, type of products

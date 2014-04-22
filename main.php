@@ -17,5 +17,5 @@
 	</p>
 </div>
 <div class="container">
-	<h3> Display Check in Code here </h3>
+	<h3> This is so kewlllll </h3>
 </div> <!-- end container -->
