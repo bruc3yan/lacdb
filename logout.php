@@ -10,16 +10,20 @@
  * 
  */
 
-	session_start();
+	// session_start();
 
-	session_destroy();
+	// session_destroy();
 
-//	header("Location: index.php");
+    unset($_SESSION['user']);
 
  ?>
+
 <div class="page-header">
 	<h2>Logout <small>You are logged out!</small></h2>
 	<p class="lead">
-		Please go back to the main page to login again!
+		Now redirecting you back to the login page!
 	</p>
+
+	<META HTTP-EQUIV="REFRESH" CONTENT="7" URL="http://lacdb.claremontbooks.com/">
+
 </div>

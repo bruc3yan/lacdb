@@ -1,156 +1,61 @@
 <?php
 /*
  *
- * Checkout page File
- * 
- * 
+ * Check out file
+ *
+ *
  * Author:  Bruce Yan
  * Updated: April 2014
- * Notes:	Modular checkout page file for things to display on home page
- * 
+ * Notes:   Multifunction check out file that should work for all items
+ *
  */
- ?>
-<div class="page-header">
-	<h2>Check Out <small>Loan items out.</small></h2>
-	<p class="lead">
-		Temp page for checking out items
-	</p>
-</div>
-<div class="container">
-	<div class="row" id="mainOverdues">
-	 	<div class="col-12">
-			<table class="table table-striped">
-			    <thead>
-			    <tr>
-			        <th>ID</th>
-			        <th>Name</th>
-			        <th>Item</th>
-			        <th>Due Date</th>
-			        <th>Days Overdue</th>
-			    </tr>
-			    </thead>
-			    <tbody>
-			    <tr>
-			        <td class="filterable-cell">40151234</td>
-			        <td class="filterable-cell">Josh</td>
-			        <td class="filterable-cell">Basketball</td>
-			        <td class="filterable-cell">04-10-2014</td>
-			        <td class="filterable-cell">3</td>
-			    </tr>
-			    <tr>
-			        <td class="filterable-cell">40151235</td>
-			        <td class="filterable-cell">Mary</td>
-			        <td class="filterable-cell">Soccerball</td>
-			        <td class="filterable-cell">04-11-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			            <tr>
-			        <td class="filterable-cell">40151236</td>
-			        <td class="filterable-cell">Billy</td>
-			        <td class="filterable-cell">Pingpong Paddles</td>
-			        <td class="filterable-cell">04-11-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			    <tr>
-			        <td class="filterable-cell">40151237</td>
-			        <td class="filterable-cell">Obama</td>
-			        <td class="filterable-cell">Surfboard</td>
-			        <td class="filterable-cell">04-12-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			    <tr>
-			        <td class="filterable-cell">40151235</td>
-			        <td class="filterable-cell">Mary</td>
-			        <td class="filterable-cell">Soccerball</td>
-			        <td class="filterable-cell">04-11-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			            <tr>
-			        <td class="filterable-cell">40151236</td>
-			        <td class="filterable-cell">Billy</td>
-			        <td class="filterable-cell">Pingpong Paddles</td>
-			        <td class="filterable-cell">04-11-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			    <tr>
-			        <td class="filterable-cell">40151235</td>
-			        <td class="filterable-cell">Mary</td>
-			        <td class="filterable-cell">Soccerball</td>
-			        <td class="filterable-cell">04-11-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			            <tr>
-			        <td class="filterable-cell">40151236</td>
-			        <td class="filterable-cell">Billy</td>
-			        <td class="filterable-cell">Pingpong Paddles</td>
-			        <td class="filterable-cell">04-11-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			    <tr>
-			        <td class="filterable-cell">40151237</td>
-			        <td class="filterable-cell">Obama</td>
-			        <td class="filterable-cell">Surfboard</td>
-			        <td class="filterable-cell">04-12-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			    <tr>
-			        <td class="filterable-cell">40151237</td>
-			        <td class="filterable-cell">Obama</td>
-			        <td class="filterable-cell">Surfboard</td>
-			        <td class="filterable-cell">04-12-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			    <tr>
-			        <td class="filterable-cell">40151235</td>
-			        <td class="filterable-cell">Mary</td>
-			        <td class="filterable-cell">Soccerball</td>
-			        <td class="filterable-cell">04-11-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			            <tr>
-			        <td class="filterable-cell">40151236</td>
-			        <td class="filterable-cell">Billy</td>
-			        <td class="filterable-cell">Pingpong Paddles</td>
-			        <td class="filterable-cell">04-11-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			    <tr>
-			        <td class="filterable-cell">40151237</td>
-			        <td class="filterable-cell">Obama</td>
-			        <td class="filterable-cell">Surfboard</td>
-			        <td class="filterable-cell">04-12-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			    <tr>
-			        <td class="filterable-cell">40151235</td>
-			        <td class="filterable-cell">Mary</td>
-			        <td class="filterable-cell">Soccerball</td>
-			        <td class="filterable-cell">04-11-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			            <tr>
-			        <td class="filterable-cell">40151236</td>
-			        <td class="filterable-cell">Billy</td>
-			        <td class="filterable-cell">Pingpong Paddles</td>
-			        <td class="filterable-cell">04-11-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			    <tr>
-			        <td class="filterable-cell">40151237</td>
-			        <td class="filterable-cell">Obama</td>
-			        <td class="filterable-cell">Surfboard</td>
-			        <td class="filterable-cell">04-12-2014</td>
-			        <td class="filterable-cell">2</td>
-			    </tr>
-			    <tr>
-			        <td class="filterable-cell">40151237</td>
-			        <td class="filterable-cell">Obama</td>
-			        <td class="filterable-cell">Surfboard</td>
-			        <td class="filterable-cell">04-12-2014</td>
-			        <td class="filterable-cell">1</td>
-			    </tr>
-			    </tbody>
-			</table>
-	 	</div> <!-- end col 12 -->
-	 </div> <!-- end row mainOverdues -->
-</div> <!-- end container -->
+
+include 'includes/functions.php';
+
+session_start();
+
+// If logged in:
+if(isset($_SESSION['user'])) {
+
+	// ensure that people got to this form from the correct place
+	if (!isset($_POST['save'])) {
+		// Immediatebly takes user back to home page
+		header("Location: ./");
+		exit;
+	}
+	// If it came from mudder bike check out
+	else if (isset($_POST['save'])) {
+		if (htmlentities($_GET['mode']) == 'mudderbike') {
+			// echo "bikeid: " . $_POST['bikeid'] . "<br />";
+			// echo "name is: " . $_POST['inputName'] . "<br />";
+			// echo "Student ID: " . $_POST['inputSID'] . "<br />";
+			// echo "Waiver: " . $_POST['inputWaiver'] . "<br />";
+			// echo "Notes: " . $_POST['inputNotes'] . "<br />";
+
+			// Grab the variables from POST and store locally
+			$bikeid = $_POST['bikeid'];
+			$sname = htmlentities($_POST['inputName']);
+			$sid = htmlentities($_POST['inputSID']);
+			$waiver = htmlentities($_POST['inputWaiver']);
+			//$notes = htmlentities($_POST['inputNotes']);
+			$notes = "";
+
+
+			// create a new instance of the Records class
+			$record = new Records;
+
+			// Perform update (this occurs on 2 tables)
+			$record->checkOutMudderBike($bikeid, $sname, $sid, $waiver, $notes);
+
+			// Has been checked out! Now redirecting
+			echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=inmudderbikes".'">';
+		}
+	}
+
+// Otherwise if not logged in, redirect to Login page!
+
+} //end session check
+else {
+	header("Location: login.php");
+}
+?>
