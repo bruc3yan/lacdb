@@ -48,6 +48,39 @@ CREATE TABLE mudderbikedata (
  	PRIMARY KEY (ownerid)
  );
 
+ DROP TABLE IF EXISTS lost;
+ CREATE TABLE lost (
+ 	name VARCHAR(256) NOT NULL,
+ 	dateLost VARCHAR(64),
+ 	dateReturned VARCHAR(64),
+ 	ownerName VARCHAR(256) NOT NULL,
+ 	ownerContact VARCHAR(64),
+ 	found INTEGER,
+ 	description VARCHAR(256),
+ 	);
+
+ DROP TABLE IF EXISTS found;
+ CREATE TABLE found (
+ 	name VARCHAR(256) NOT NULL,
+ 	dateLost VARCHAR(64),
+ 	dateReturned VARCHAR(64) NOT NULL,
+ 	returnedTo VARCHAR(256),
+ 	found INTEGER,
+ 	description VARCHAR(256),
+ 	);
+
+DROP TABLE IF EXISTS rooms;
+CREATE TABLE rooms (
+	rid int NOT NULL,
+	name VARCHAR(256),
+	status VARCHAR(256), /* NONE, inuse, reserved, returnedn, late */
+	reservDate VARCHAR(256) NOT NULL,
+	duration VARCHAR(256) NOT NULL,
+	contactName VARCHAR(256) NOT NULL,
+	description VARCHAR(256),
+);
+
+
 /*
 # Products: relation that gives the mfg, model number, type of products
 CREATE TABLE Products (

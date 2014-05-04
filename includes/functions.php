@@ -519,6 +519,89 @@ class Records {
                 </div> <!-- end my myModal -->';
             }
     }
+    /*
+
+     function listCheckedRooms($json, $edit, $history) {
+    	// Print all items in database
+    	// 	json = 1 means skip the table output but just display json script
+    	//  edit = 1 means certain boxes appear for editing
+    	//  history = 1 means display all returned bikes, 0 means display currently unreturned bikes
+
+    	if ($history == 1)
+    		$stmt = $this->db->prepare('SELECT * FROM rooms WHERE (status LIKE \'%return%\' OR status LIKE \'%late%\')ORDER BY rentid DESC');
+    	else
+    		$stmt = $this->db->prepare('SELECT * FROM rooms WHERE (status NOT LIKE \'%return%\' AND status NOT LIKE \'%late%\') ORDER BY rentid DESC');
+
+        $stmt->execute();
+        $stmt->bind_result($rid, $name, $status, $reservDate, $duration, $contactName, $description);
+        $stmt->store_result(); // store result set into buffer
+
+
+        // JSON variables - prepare array to encode JSON with
+        $outerArray = array();
+
+        // Push the results into JSON format if requested
+
+        if ($json == 1) {
+            // Loop through each statement to grab columns and data
+            while ($stmt->fetch()) {
+                $loopArray = array('rid' => $rid, 'name' => $name, 'status' => $status, 'reservDate' => $reservDate, 'duration' => $duration, 'contactName' => $contactName, 'description' => $description);
+                array_push($outerArray, $loopArray);
+            }
+
+            $returnArray = array("Room Reservation" => $outerArray);
+
+            echo json_encode($returnArray);
+            exit;
+        }
+
+		// Loop through the associative array and output all results.
+		if ($stmt->num_rows == 0)
+			echo "<h4>No room for reservation currently in the database!</h4>";
+		else
+		{
+			// Print table header
+			echo "				<div class=\"table-responsive\">";
+			echo "					<table class=\"table table-striped table-hover table-bordered\">";
+			echo "			    	<thead>";
+			echo "			    	<tr>";
+			echo "			        	<th>Room ID</th>";
+			echo "			        	<th>Room Name</th>";
+			echo "			        	<th>Status</th>";
+			echo "			        	<th>Reservation Date</th>";
+			echo "			        	<th>Duration</th>";
+			echo "			        	<th>Contact Name</th>";
+			echo "			        	<th>Description</th>";
+			echo "			    	</tr>";
+			echo "			    	</thead>";
+			echo "			    	<tbody>";
+
+			// Print table data by looping through all the rows
+	        while ($stmt->fetch()) {
+                // This will loop through all the bikeids and the HTML will have unique identifiers
+                $checkinButton = "<button class=\"btn btn-sm btn-success\" data-toggle=\"modal\" data-target=\"#bikeCheckin".$bikeid."\">Check In</button>";
+
+				echo "			    	<tr>";
+				echo "			        	<td>$rid</td>";
+				echo "			        	<td>$name</td>";
+				echo "			        	<td>$status</td>";
+				echo "			        	<td>" . date('m/d/y', strtotime($reservDate)) . "</td>";
+				echo "			        	<td>$duration</td>";
+				echo "			        	<td>$contactName</td>";
+				echo "			        	<td>$description</td>";
+                echo "                      <td>" . ($history != 1 ? $checkinButton : '');
+                //echo                        $history != 1 ? $this->printMudderbikeModalWindow($bikeid, 0, $rentid, $sname, $sid, $waiver) : '' . "</td>";
+				echo "			    	</tr>";
+	        }
+
+	        // Close table
+			echo "			    	</tbody>";
+			echo "				</table>";
+			echo "			</div>";
+    	}
+        $stmt->close();
+    }*/
+
 } //end Records
 
 class Users {
