@@ -1,12 +1,12 @@
 /*
  * CS 133: Final project
- * 
+ *
  * Authors: Bruce Yan, Angela Zhou
  * E-mail: byan@hmc.edu, azhou@hmc.edu
- * 
+ *
  * To connect to SQL database, follow the steps below:
  *     1. SSH into yaddazonkey@claremontbooks.com, navigate to sql folder
- *     2. mysql -u byaz -p -h mysql.claremontbooks.com zonkey 
+ *     2. mysql -u byaz -p -h mysql.claremontbooks.com zonkey
  *     3. Enter your root password first (if prompted)
  *     4. Enter byaz's password, which is: Zonkey9387!$
  *     5. load "source script1.sql"
@@ -26,7 +26,7 @@ DROP TABLE IF EXISTS mudderbikedata;
 CREATE TABLE mudderbikedata (
 	bikeid INTEGER NOT NULL AUTO_INCREMENT,
 	available VARCHAR(64) NOT NULL,
-	notes VARCHAR(256), 
+	notes VARCHAR(256),
 	dateofbirth DATE,
 	dateofdeath DATE,
 	PRIMARY KEY (bikeid)
@@ -81,6 +81,27 @@ CREATE TABLE rooms (
 );
 
 
+DROP TABLE IF EXISTS equipmentdata;
+CREATE TABLE equipmentdata (
+	equipmentid INT NOT NULL AUTO_INCREMENT,
+	qtyleft INT DEFAULT 999,
+	notes VARCHAR(256),
+	ownerid INT DEFAULT 0,
+	PRIMARY KEY (equipmentid)
+);
+
+
+DROP TABLE IF EXISTS equipmentrentals;
+CREATE TABLE equipmentrentals (
+	name VARCHAR(256) NOT NULL,
+	ownerid INT NOT NULL,
+	description VARCHAR(256),
+	contactName VARCHAR(256),
+	contactNum VARCHAR(64),
+	contactEmail VARCHAR(256),
+	PRIMARY KEY (ownerid)
+);
+
 /*
 # Products: relation that gives the mfg, model number, type of products
 CREATE TABLE Products (
@@ -90,7 +111,7 @@ CREATE TABLE Products (
 	PRIMARY KEY (model)
 );
 
-# PCs: relation gives for each model number that is a PC the speed, amount of 
+# PCs: relation gives for each model number that is a PC the speed, amount of
 # ram, amount of HD, and price
 CREATE TABLE PCs (
 	model INTEGER NOT NULL,
@@ -102,7 +123,7 @@ CREATE TABLE PCs (
 	FOREIGN KEY (model) REFERENCES Products (model)
 );
 
-# Laptops: relation gives for each model number that is a laptop the speed, 
+# Laptops: relation gives for each model number that is a laptop the speed,
 # amount of ram, amount of HD, price and screen size
 CREATE TABLE Laptops (
 	model INTEGER NOT NULL,
@@ -153,31 +174,31 @@ INSERT INTO Products (maker, model, type)
 
 
 # Load some sample PCs
-INSERT INTO PCs (model, speed, ram, hd, price) 
+INSERT INTO PCs (model, speed, ram, hd, price)
 	VALUES (1001, 3.0, 8.0, 320, 1500);
-INSERT INTO PCs (model, speed, ram, hd, price) 
+INSERT INTO PCs (model, speed, ram, hd, price)
 	VALUES (1002, 2.8, 8.0, 500, 1690);
-INSERT INTO PCs (model, speed, ram, hd, price) 
+INSERT INTO PCs (model, speed, ram, hd, price)
 	VALUES (1003, 2.4, 16.0, 500, 1999);
 
-# Load some sample Laptops	
-INSERT INTO Laptops (model, speed, ram, hd, screen, price) 
+# Load some sample Laptops
+INSERT INTO Laptops (model, speed, ram, hd, screen, price)
 	VALUES (1004, 1.8, 4.0, 120, 13, 1100);
-INSERT INTO Laptops (model, speed, ram, hd, screen, price) 
+INSERT INTO Laptops (model, speed, ram, hd, screen, price)
 	VALUES (1005, 1.7, 4.0, 120, 11, 1000);
-INSERT INTO Laptops (model, speed, ram, hd, screen, price) 
+INSERT INTO Laptops (model, speed, ram, hd, screen, price)
 	VALUES (1006, 2.0, 8.0, 250, 15, 1900);
-INSERT INTO Laptops (model, speed, ram, hd, screen, price) 
+INSERT INTO Laptops (model, speed, ram, hd, screen, price)
 	VALUES (1007, 2.4, 8.0, 250, 15, 2400);
-INSERT INTO Laptops (model, speed, ram, hd, screen, price) 
+INSERT INTO Laptops (model, speed, ram, hd, screen, price)
 	VALUES (1008, 2.8, 16.0, 500, 17, 3200);
 
 # Load some sample Printers
-INSERT INTO Printers (model, color, printertype, price) 
+INSERT INTO Printers (model, color, printertype, price)
 	VALUES (1009, FALSE, "Laser", 99);
-INSERT INTO Printers (model, color, printertype, price) 
+INSERT INTO Printers (model, color, printertype, price)
 	VALUES (1010, FALSE, "Laser", 125);
-INSERT INTO Printers (model, color, printertype, price) 
+INSERT INTO Printers (model, color, printertype, price)
 	VALUES (1011, TRUE, "Ink-Jet", 450);
 
 # Sample Queries

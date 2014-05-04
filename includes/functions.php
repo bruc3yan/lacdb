@@ -162,7 +162,7 @@ class Records {
     }
 
     function listMudderBikeRentals($json, $edit, $history) {
-    	// Print all items in database
+    	// Print all bikes in database
     	// 	json = 1 means skip the table output but just display json script
     	//  edit = 1 means certain boxes appear for editing
     	//  history = 1 means display all returned bikes, 0 means display currently unreturned bikes
@@ -254,7 +254,7 @@ class Records {
     }
 
     function listMudderBikeData($json, $edit) {
-    	// Print all items in database
+    	// Print all bikes in database
     	// 	json = 1 means skip the table output but just display json script
     	//  edit = 1 means certain boxes appear for editing
 
