@@ -93,6 +93,21 @@ CREATE TABLE equipmentdata (
 
 DROP TABLE IF EXISTS equipmentrentals;
 CREATE TABLE equipmentrentals (
+	rentid INT NOT NULL AUTO_INCREMENT,
+	equipmentid INT NOT NULL,
+	sname VARCHAR(64) NOT NULL,
+	sid INT NOT NULL,
+
+	date
+	item
+	user
+	date out
+	date in
+	id #
+	school
+	time out
+	time in
+
 	name VARCHAR(256) NOT NULL,
 	ownerid INT NOT NULL,
 	description VARCHAR(256),
