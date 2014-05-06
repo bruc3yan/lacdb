@@ -80,43 +80,46 @@ CREATE TABLE rooms (
 	description VARCHAR(256),
 );
 
-
+/* Equipment Data */
 DROP TABLE IF EXISTS equipmentdata;
 CREATE TABLE equipmentdata (
 	equipmentid INT NOT NULL AUTO_INCREMENT,
+	name VARCHAR(256) NOT NULL,
 	qtyleft INT DEFAULT 999,
 	notes VARCHAR(256),
 	ownerid INT DEFAULT 0,
 	PRIMARY KEY (equipmentid)
 );
 
+/* Sample Equipment data */
+INSERT INTO equipmentdata (name) VALUES ("Xbox controller");
+INSERT INTO equipmentdata (name) VALUES ("Ping pong paddle");
+INSERT INTO equipmentdata (name) VALUES ("billiards supplies");
+INSERT INTO equipmentdata (name) VALUES ("basketball");
+INSERT INTO equipmentdata (name) VALUES ("soccerball");
+INSERT INTO equipmentdata (name) VALUES ("pool");
+INSERT INTO equipmentdata (name) VALUES ("ping pong paddles");
 
+/* Equipment Rentals */
 DROP TABLE IF EXISTS equipmentrentals;
 CREATE TABLE equipmentrentals (
 	rentid INT NOT NULL AUTO_INCREMENT,
 	equipmentid INT NOT NULL,
 	sname VARCHAR(64) NOT NULL,
 	sid INT NOT NULL,
-
-	date
-	item
-	user
-	date out
-	date in
-	id #
-	school
-	time out
-	time in
-
-	name VARCHAR(256) NOT NULL,
-	ownerid INT NOT NULL,
-	description VARCHAR(256),
-	contactName VARCHAR(256),
-	contactNum VARCHAR(64),
-	contactEmail VARCHAR(256),
-	PRIMARY KEY (ownerid)
+	dateout DATE,
+	datein DATE,
+	school VARCHAR(64) NOT NULL,
+	timeout DATETIME,
+	timein DATETIME,
+	PRIMARY KEY (rentid)
 );
 
+/*
+ *
+ * OLD STUFF
+ *	(Not needed)
+ */
 /*
 # Products: relation that gives the mfg, model number, type of products
 CREATE TABLE Products (
