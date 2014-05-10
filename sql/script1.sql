@@ -112,6 +112,7 @@ CREATE TABLE equipmentrentals (
 	school VARCHAR(64) NOT NULL,
 	timeout TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	timein TIMESTAMP,
+	notes TEXT,
 	PRIMARY KEY (rentid)
 );
 

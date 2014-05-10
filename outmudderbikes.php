@@ -26,6 +26,6 @@
 				// list all the rentals in tabular format
 				$record->listMudderBikeData(0, 1);
 			?>
-	 	</div> <!-- end col 12 -->
+	 	</div> <!-- end col 8 -->
 	 </div> <!-- end row inmudderbikes -->
 </div> <!-- end container -->

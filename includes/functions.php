@@ -546,6 +546,79 @@ class Records {
             }
     }
 
+    function listEquipmentData($json, $edit) {
+        // Print all existing equipment in database
+        //  json = 1 means skip the table output but just display json script
+        //  edit = 1 means certain boxes appear for editing
+
+        $stmt = $this->db->prepare('SELECT * FROM equipmentdata');
+        $stmt->execute();
+        $stmt->bind_result($equipmentid, $name, $qtyleft, $notes, $ownerid);
+        $stmt->store_result(); // store result set into buffer
+
+        // Push the results into JSON format if requested
+        if ($json == 1) {
+            // JSON variables - prepare array to encode JSON with
+            $outerArray = array();
+
+            // Loop through each statement to grab columns and data
+            while ($stmt->fetch()) {
+                $loopArray = array('equipmentid' => $equipmentid, 'name' => $name, 'qtyleft' => $qtyleft, 'notes' => $notes, 'ownerid' => $ownerid);
+                array_push($outerArray, $loopArray);
+            }
+
+            $returnArray = array("equipmentdata" => $outerArray);
+
+            echo json_encode($returnArray);
+            exit;
+        }
+
+        // Loop through the associative array and output all results.
+        // If no data exists
+        if ($stmt->num_rows == 0)
+            echo "<h4>No equipment data currently in the database!</h4>";
+        // Print all results if data exists
+        else
+        {
+            // Print table header
+            echo "              <div class=\"table-responsive\">";
+            echo "                  <table class=\"table table-striped table-hover table-bordered\">";
+            echo "                  <thead>";
+            echo "                  <tr>";
+            echo "                      <th>Equipment ID</th>";
+            echo "                      <th>Equipment Name</th>";
+            echo "                      <th>Quantity Left</th>";
+            echo "                      <th>Notes</th>";
+            echo "                      <th>Owner ID</th>";
+            echo "                      <th>Actions</th>";
+            echo "                  </tr>";
+            echo "                  </thead>";
+            echo "                  <tbody>";
+
+            // Print table data by looping through all the rows
+            while ($stmt->fetch()) {
+                // This will loop through all the bikeids and the HTML will have unique identifiers
+                $checkoutButton = "<button class=\"btn btn-sm btn-primary\" data-toggle=\"modal\" data-target=\"#bikeCheckout".$equipmentid."\">Check out</button>";
+
+                echo "                  <tr>";
+                echo "                      <td>$equipmentid</td>";
+                echo "                      <td>$name</td>";
+                echo "                      <td>$qtyleft</td>";
+                echo "                      <td>$notes</td>";
+                echo "                      <td>$ownerid</td>";
+                echo "                      <td>" . ($qtyleft >= 1 ? $checkoutButton : '');
+                echo                        $qtyleft >= 1 ? $this->printMudderbikeModalWindow($equipmentid, 1) : '' . "</td>";
+                echo "                  </tr>";
+            }
+
+            // Close table
+            echo "                  </tbody>";
+            echo "              </table>";
+            echo "          </div>";
+        }
+        $stmt->close();
+    }
+
     function listEquipmentRentals($json, $edit, $history) {
         // Print all equipment rentals in database
         //  json = 1 means skip the table output but just display json script
@@ -553,12 +626,12 @@ class Records {
         //  history = 1 means display all returned bikes, 0 means display currently unreturned bikes
 
         if ($history == 1)
-            $stmt = $this->db->prepare('SELECT rentid, bikeid, sname, sid, waiver, dateout, keyreturnedto, datein, status, latedays, paidcollectedby, notes FROM mudderbikerentals WHERE (status LIKE \'%return%\' OR status LIKE \'%late%\')ORDER BY rentid DESC');
+            $stmt = $this->db->prepare('SELECT rentid, equipmentid, sname, sid, dateout, datein, school, timeout, timein, notes FROM equipmentrentals WHERE (datein IS NULL) ORDER BY rentid DESC');
         else
-            $stmt = $this->db->prepare('SELECT rentid, bikeid, sname, sid, waiver, dateout, keyreturnedto, datein, status, latedays, paidcollectedby, notes FROM mudderbikerentals WHERE (status NOT LIKE \'%return%\' AND status NOT LIKE \'%late%\') ORDER BY rentid DESC');
+            $stmt = $this->db->prepare('SELECT rentid, equipmentid, sname, sid, dateout, datein, school, timeout, timein, notes FROM equipmentrentals WHERE (datein IS NOT NULL) ORDER BY rentid DESC');
 
         $stmt->execute();
-        $stmt->bind_result($rentid, $bikeid, $sname, $sid, $waiver, $dateout, $keyreturnedto, $datein, $status, $latedays, $paidcollectedby, $notes);
+        $stmt->bind_result($rentid, $equipmentid, $sname, $sid, $dateout, $datein, $school, $timeout, $timein, $notes);
         $stmt->store_result(); // store result set into buffer
 
 
@@ -570,11 +643,11 @@ class Records {
         if ($json == 1) {
             // Loop through each statement to grab columns and data
             while ($stmt->fetch()) {
-                $loopArray = array('rentid' => $rentid, 'bikeid' => $bikeid, 'sname' => $sname, 'sid' => $sid, 'waiver' => $waiver, 'dateout' => $dateout, 'keyreturnedto' => $keyreturnedto, 'datein' => $datein, 'status' => $status, 'latedays' => $latedays, 'paidcollectedby' => $paidcollectedby, 'notes' => $notes);
+                $loopArray = array('rentid' => $rentid, 'equipmentid' => $equipmentid, 'sname' => $sname, 'sid' => $sid, 'dateout' => $dateout, 'datein' => $datein, 'school' => $school, 'timeout' => $timeout, 'timein' => $timein, 'notes' => $notes);
                 array_push($outerArray, $loopArray);
             }
 
-            $returnArray = array("bikerentals" => $outerArray);
+            $returnArray = array("equipmentrentals" => $outerArray);
 
             echo json_encode($returnArray);
             exit;
@@ -591,16 +664,14 @@ class Records {
             echo "                  <thead>";
             echo "                  <tr>";
             echo "                      <th>Rental ID</th>";
-            echo "                      <th>Bike ID</th>";
+            echo "                      <th>Equipment ID</th>";
             echo "                      <th>Student Name</th>";
             echo "                      <th>Student ID</th>";
-            echo "                      <th>Waiver?</th>";
             echo "                      <th>Check Out Date</th>";
-            echo "                      <th>Key Returned To</th>";
             echo "                      <th>Check In Date</th>";
-            echo "                      <th>Status</th>";
-            echo "                      <th>Late Days</th>";
-            echo "                      <th>Paid/Collected By</th>";
+            echo "                      <th>School</th>";
+            echo "                      <th>Check Out Time</th>";
+            echo "                      <th>Check In Time</th>";
             echo "                      <th>Notes</th>";
             echo "                      <th>Actions</th>";
             echo "                  </tr>";
@@ -610,23 +681,21 @@ class Records {
             // Print table data by looping through all the rows
             while ($stmt->fetch()) {
                 // This will loop through all the bikeids and the HTML will have unique identifiers
-                $checkinButton = "<button class=\"btn btn-sm btn-success\" data-toggle=\"modal\" data-target=\"#bikeCheckin".$bikeid."\">Check In</button>";
+                $checkinButton = "<button class=\"btn btn-sm btn-success\" data-toggle=\"modal\" data-target=\"#bikeCheckin".$rentid."\">Check In</button>";
 
                 echo "                  <tr>";
                 echo "                      <td>$rentid</td>";
-                echo "                      <td>$bikeid</td>";
+                echo "                      <td>$equipmentid</td>";
                 echo "                      <td>$sname</td>";
                 echo "                      <td>$sid</td>";
-                echo "                      <td>$waiver</td>";
                 echo "                      <td>" . date('m/d/y', strtotime($dateout)) . "</td>";
-                echo "                      <td>$keyreturnedto</td>";
-                echo "                      <td>" . ($datein == "0000-00-00" ? 'Unclaimed' : date('m/d/y', strtotime($datein))) . "</td>";
-                echo "                      <td>$status</td>";
-                echo "                      <td>$latedays</td>";
-                echo "                      <td>$paidcollectedby</td>";
+                echo "                      <td>" . date('m/d/y', strtotime($datein)) . "</td>";
+                echo "                      <td>$school</td>";
+                echo "                      <td>" . ($timeout == "0000-00-00" ? 'Unclaimed' : date('m/d/y h:i:s', strtotime($timeout))) . "</td>";
+                echo "                      <td>$timein</td>";
                 echo "                      <td>$notes</td>";
                 echo "                      <td>" . ($history != 1 ? $checkinButton : '');
-                echo                        $history != 1 ? $this->printMudderbikeModalWindow($bikeid, 0, $rentid, $sname, $sid, $waiver) : '' . "</td>";
+                echo                        $history != 1 ? $this->printMudderbikeModalWindow($equipmentid, 0, $rentid, $sname, $sid, $waiver = 0) : '' . "</td>";
                 echo "                  </tr>";
             }
 
