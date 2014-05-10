@@ -263,13 +263,11 @@ class Records {
         $stmt->bind_result($bikeid, $available, $notes, $dateofbirth, $dateofdeath);
         $stmt->store_result(); // store result set into buffer
 
-
-        // JSON variables - prepare array to encode JSON with
-        $outerArray = array();
-
         // Push the results into JSON format if requested
-
         if ($json == 1) {
+            // JSON variables - prepare array to encode JSON with
+            $outerArray = array();
+
             // Loop through each statement to grab columns and data
             while ($stmt->fetch()) {
                 $loopArray = array('bikeid' => $bikeid, 'available' => $available, 'notes' => $notes, 'dateofbirth' => $dateofbirth, 'dateofdeath' => $dateofdeath);
@@ -283,9 +281,11 @@ class Records {
         }
 
 		// Loop through the associative array and output all results.
+        // If no data exists
 		if ($stmt->num_rows == 0)
 			echo "<h4>No bike data currently in the database!</h4>";
-		else
+		// Print all results if data exists
+        else
 		{
 			// Print table header
 			echo "				<div class=\"table-responsive\">";
@@ -332,18 +332,31 @@ class Records {
         //  $bikeid = needed for setting bike data back to available
         //  $datein = return date
 
-        //TODO: THIS IS WHERE WE MAY NEED TO DO TRANSACTIONS or TRIGGERS, because right now, it's 2 separate updates
-        // First set the availability = 1 in the bike data
-        $stmt = $this->db->prepare('UPDATE mudderbikedata SET available = 1 WHERE bikeid=?');
-        $stmt->bind_param("i", $bikeid);
-        $stmt->execute();
-        $stmt->close();
+        try {
+            // Begin a transaction
+            $this->db->autocommit(FALSE);
 
-        // Then we add an entry to the bike rentals table
-        $stmt = $this->db->prepare('UPDATE mudderbikerentals SET keyreturnedto = ?, datein = ?, status = ?, latedays = ?, paidcollectedby = ?, notes = ? WHERE rentid = ?');
-        $stmt->bind_param("sssissi", $keyreturnedto, $datein, $status, $late, $paid, $notes, $rentid);
-        $stmt->execute();
-        $stmt->close();
+            // First set the availability = 1 in the bike data
+            $stmt = $this->db->prepare('UPDATE mudderbikedata SET available = 1 WHERE bikeid=?');
+            $stmt->bind_param("i", $bikeid);
+            $stmt->execute();
+            $stmt->close();
+
+            // Then we add an entry to the bike rentals table
+            $stmt = $this->db->prepare('UPDATE mudderbikerentals SET keyreturnedto = ?, datein = ?, status = ?, latedays = ?, paidcollectedby = ?, notes = ? WHERE rentid = ?');
+            $stmt->bind_param("sssissi", $keyreturnedto, $datein, $status, $late, $paid, $notes, $rentid);
+            $stmt->execute();
+            $stmt->close();
+
+            // We commit the transaction because nothing has failed
+            $this->db->commit();
+            $this->db->autocommit(TRUE); // end transaction
+        } catch (Exception $e) {
+            // An exception has been thrown
+            // We must rollback the transaction
+            $db->rollback();
+            $this->db->autocommit(TRUE); // end transaction
+        }
     }
 
     function checkOutMudderBike($bikeid, $sname, $sid, $waiver, $notes, $status="") {
@@ -359,18 +372,31 @@ class Records {
     	// Get today's date
     	$dateout = date('y/m/d');
 
-    	//TODO: THIS IS WHERE WE MAY NEED TO DO TRANSACTIONS or TRIGGERS, because right now, it's 2 separate updates
-        // First set the availability = 0 in the bike data
-    	$stmt = $this->db->prepare('UPDATE mudderbikedata SET available = 0 WHERE bikeid=?');
-    	$stmt->bind_param("i", $bikeid);
-        $stmt->execute();
-        $stmt->close();
+        try {
+            // Begin a transaction
+            $this->db->autocommit(FALSE);
 
-        // Then we add an entry to the bike rentals table
-    	$stmt = $this->db->prepare('INSERT INTO mudderbikerentals (bikeid, sname, sid, waiver, dateout, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    	$stmt->bind_param("isissss", $bikeid, $sname, $sid, $waiver, $dateout, $status, $notes);
-        $stmt->execute();
-        $stmt->close();
+            // First set the availability = 0 in the bike data
+            $stmt = $this->db->prepare('UPDATE mudderbikedata SET available = 0 WHERE bikeid=?');
+            $stmt->bind_param("i", $bikeid);
+            $stmt->execute();
+            $stmt->close();
+
+            // Then we add an entry to the bike rentals table
+            $stmt = $this->db->prepare('INSERT INTO mudderbikerentals (bikeid, sname, sid, waiver, dateout, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $stmt->bind_param("isissss", $bikeid, $sname, $sid, $waiver, $dateout, $status, $notes);
+            $stmt->execute();
+            $stmt->close();
+
+            // We commit the transaction because nothing has failed
+            $this->db->commit();
+            $this->db->autocommit(TRUE); // end transaction
+        } catch (Exception $e) {
+            // An exception has been thrown
+            // We must rollback the transaction
+            $db->rollback();
+            $this->db->autocommit(TRUE); // end transaction
+        }
     }
 
     // $available = 1 means display CHECK OUT

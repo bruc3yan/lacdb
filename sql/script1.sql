@@ -107,13 +107,29 @@ CREATE TABLE equipmentrentals (
 	equipmentid INT NOT NULL,
 	sname VARCHAR(64) NOT NULL,
 	sid INT NOT NULL,
-	dateout DATE,
+	dateout DATE NOT NULL,
 	datein DATE,
 	school VARCHAR(64) NOT NULL,
-	timeout DATETIME,
-	timein DATETIME,
+	timeout TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	timein TIMESTAMP,
 	PRIMARY KEY (rentid)
 );
+
+/* Sample Equipment Rental data */
+INSERT INTO equipmentrentals (equipmentid, sname, sid, dateout, school)
+	VALUES (0, "Bruce Yan", 40114398, "2014-05-06", "HMC");
+INSERT INTO equipmentrentals (equipmentid, sname, sid, dateout, school)
+	VALUES (2, "Bruce Yan", 40114398, "2014-05-06", "HMC");
+INSERT INTO equipmentrentals (equipmentid, sname, sid, dateout, school)
+	VALUES (1, "John Paul", 40111234, "2014-05-06", "CMC");
+INSERT INTO equipmentrentals (equipmentid, sname, sid, dateout, school)
+	VALUES (1, "Angela Zhou", 40156876, "2014-05-05", "HMC");
+INSERT INTO equipmentrentals (equipmentid, sname, sid, dateout, school)
+	VALUES (3, "Robin Star", 40131461, "2014-05-03", "CGU");
+INSERT INTO equipmentrentals (equipmentid, sname, sid, dateout, school)
+	VALUES (4, "Eva Woods", 40159987, "2014-05-02", "POM");
+INSERT INTO equipmentrentals (equipmentid, sname, sid, dateout, school)
+	VALUES (6, "Kiwi Fruit", 40163526, "2014-05-04", "PTZ");
 
 /*
  *
