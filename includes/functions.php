@@ -598,7 +598,7 @@ class Records {
             // Print table data by looping through all the rows
             while ($stmt->fetch()) {
                 // This will loop through all the bikeids and the HTML will have unique identifiers
-                $checkoutButton = "<button class=\"btn btn-sm btn-primary\" data-toggle=\"modal\" data-target=\"#bikeCheckout".$equipmentid."\">Check out</button>";
+                $checkoutButton = "<button class=\"btn btn-sm btn-primary\" data-toggle=\"modal\" data-target=\"#equipmentCheckout".$equipmentid."\">Check out</button>";
 
                 echo "                  <tr>";
                 echo "                      <td>$equipmentid</td>";
@@ -607,7 +607,7 @@ class Records {
                 echo "                      <td>$notes</td>";
                 echo "                      <td>$ownerid</td>";
                 echo "                      <td>" . ($qtyleft >= 1 ? $checkoutButton : '');
-                echo                        $qtyleft >= 1 ? $this->printMudderbikeModalWindow($equipmentid, 1) : '' . "</td>";
+                echo                        $qtyleft >= 1 ? $this->printEquipmentModalWindow($equipmentid, 1) : '' . "</td>";
                 echo "                  </tr>";
             }
 
@@ -681,7 +681,7 @@ class Records {
             // Print table data by looping through all the rows
             while ($stmt->fetch()) {
                 // This will loop through all the bikeids and the HTML will have unique identifiers
-                $checkinButton = "<button class=\"btn btn-sm btn-success\" data-toggle=\"modal\" data-target=\"#bikeCheckin".$rentid."\">Check In</button>";
+                $checkinButton = "<button class=\"btn btn-sm btn-success\" data-toggle=\"modal\" data-target=\"#equipmentCheckin".$rentid."\">Check In</button>";
 
                 echo "                  <tr>";
                 echo "                      <td>$rentid</td>";
@@ -695,7 +695,7 @@ class Records {
                 echo "                      <td>$timein</td>";
                 echo "                      <td>$notes</td>";
                 echo "                      <td>" . ($history != 1 ? $checkinButton : '');
-                echo                        $history != 1 ? $this->printMudderbikeModalWindow($equipmentid, 0, $rentid, $sname, $sid, $waiver = 0) : '' . "</td>";
+                echo                        $history != 1 ? $this->printEquipmentModalWindow($equipmentid, 0, $rentid, $sname, $sid, $waiver = 0) : '' . "</td>";
                 echo "                  </tr>";
             }
 
@@ -706,6 +706,154 @@ class Records {
         }
         $stmt->close();
     }
+
+    // $available = 1 means display CHECK OUT
+    // $available = 0 means display CHECK IN
+    function printEquipmentModalWindow($equipmentid, $available, $rentid = -1, $sname = "", $sid = -1, $waiver = "") {
+        if ($available == 1) {
+            return '    <div class="modal fade" id="equipmentCheckout'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentCheckout'.$equipmentid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="equipmentLabel">Mudder Bike Checkout Form</h4>
+                            </div> <!-- end modal header -->
+                            <form action="checkout.php?mode=equipment" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="equipmentid" class="col-sm-2 control-label">Equipment ID</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$equipmentid.'</p>
+                                            </div>
+                                            <input type="hidden" name="equipmentid" value="'.$equipmentid.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputName" class="col-sm-2 control-label">Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputName" id="inputName" placeholder="Name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputSID" class="col-sm-2 control-label">ID #</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputSID" id="inputSID" placeholder="Student ID#">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputWaiver" class="col-sm-2 control-label">School</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputSchool" id="inputSchool" placeholder="School">
+                                            </div>
+                                        </div><!--
+                                        <div class="form-group">
+                                            <label for="inputNotes" class="col-sm-2 control-label">Notes</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputNotes" id="inputNotes" placeholder="Notes">
+                                            </div>
+                                        </div>-->
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+            } else {
+                return '   <div class="modal fade" id="equipmentCheckin'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentCheckin'.$equipmentid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="equipmentLabel">Mudder Bike Checkin Form</h4>
+                            </div> <!-- end modal header -->
+                            <form action="checkin.php?mode=mudderbike" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="rentid" class="col-sm-4 control-label">Rent ID</label>
+                                            <div class="col-sm-8">
+                                               <p class="form-control-static">'.$rentid.'</p>
+                                            </div>
+                                            <input type="hidden" name="rentid" value="'.$rentid.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="equipmentid" class="col-sm-4 control-label">Bike ID</label>
+                                            <div class="col-sm-8">
+                                               <p class="form-control-static">'.$equipmentid.'</p>
+                                            </div>
+                                            <input type="hidden" name="equipmentid" value="'.$equipmentid.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sname" class="col-sm-4 control-label">Name</label>
+                                            <div class="col-sm-8">
+                                                <p class="form-control-static">'.$sname.'</p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sid" class="col-sm-4 control-label">ID #</label>
+                                            <div class="col-sm-8">
+                                                <p class="form-control-static">'.$sid.'</p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="waiver" class="col-sm-4 control-label">Waiver</label>
+                                            <div class="col-sm-8">
+                                                <p class="form-control-static">'.$waiver.'</p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputDateIn" class="col-sm-4 control-label">Date In</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" name="inputDateIn" id="inputDateIn" placeholder="Date of Return, format: yyyy/mm/dd">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputStatus" class="col-sm-4 control-label">Status</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" name="inputStatus" id="inputStatus" placeholder="i.e. Returned">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputkeyreturnedto" class="col-sm-4 control-label">Key Returned To</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" name="inputkeyreturnedto" id="inputkeyreturnedto" placeholder="LAC Staff Name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputLate" class="col-sm-4 control-label">Late</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" name="inputLate" id="inputLate" placeholder="Manual Entry of days late">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputPaid" class="col-sm-4 control-label">Paid / Collected By</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" name="inputPaid" id="inputPaid" placeholder="LAC Staff Name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputNotes" class="col-sm-4 control-label">Notes</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" name="inputNotes" id="inputNotes" placeholder="Notes">
+                                            </div>
+                                        </div>
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+            }
+    }
+
     /*
 
      function listCheckedRooms($json, $edit, $history) {

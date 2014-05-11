@@ -50,6 +50,31 @@ if(isset($_SESSION['user'])) {
 			// Has been checked out! Now redirecting
 			echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=inmudderbikes".'">';
 		}
+		if (htmlentities($_GET['mode']) == 'equipment') {
+			// echo "bikeid: " . $_POST['bikeid'] . "<br />";
+			// echo "name is: " . $_POST['inputName'] . "<br />";
+			// echo "Student ID: " . $_POST['inputSID'] . "<br />";
+			// echo "Waiver: " . $_POST['inputWaiver'] . "<br />";
+			// echo "Notes: " . $_POST['inputNotes'] . "<br />";
+
+			// Grab the variables from POST and store locally
+			$bikeid = $_POST['equipmentid'];
+			$sname = htmlentities($_POST['inputName']);
+			$sid = htmlentities($_POST['inputSID']);
+			$waiver = htmlentities($_POST['inputSchool']);
+			$notes = htmlentities($_POST['inputNotes']);
+			//$notes = "";
+
+
+			// create a new instance of the Records class
+			$record = new Records;
+
+			// Perform update (this occurs on 2 tables)
+			$record->checkOutEquipment($equipmentid, $sname, $sid, $school, $notes);
+
+			// Has been checked out! Now redirecting
+			echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=inmudderbikes".'">';
+		}
 	}
 
 // Otherwise if not logged in, redirect to Login page!
