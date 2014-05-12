@@ -564,14 +564,15 @@ class Records {
         $stmt->close();
     }
 
-    // Delete equipment
+    // Delete equipment // TODO Delete somehow doesn't work
     function deleteEquipmentData($equipmentid) {
         // Prepare delete statement
-        $stmt = $this->db->prepare('DELETE FROM equipmentdata WHERE equipmentid=?');
+        $stmt = $this->db->prepare('DELETE FROM zonkey.equipmentdata WHERE equipmentdata.equipmentid=?');
         $stmt->bind_param("i", $equipmentid);
         $stmt->execute();
 
         $stmt->close();
+        $this->db->commit();
     }
 
     // Helper function to Grab equipment data first based on equipmentid attribute
@@ -639,7 +640,9 @@ class Records {
             // Print table data by looping through all the rows
             while ($stmt->fetch()) {
                 // This will loop through all the bikeids and the HTML will have unique identifiers
-                $checkoutButton = "<button class=\"btn btn-sm btn-primary\" data-toggle=\"modal\" data-target=\"#equipmentCheckout".$equipmentid."\">Check out</button>";
+                $checkoutButton = "<button class=\"btn btn-sm btn-primary\" data-toggle=\"modal\" data-target=\"#equipmentCheckout".$equipmentid."\">Check out</button>&nbsp;";
+                $modifyButton = "<button class=\"btn btn-sm btn-warning\" data-toggle=\"modal\" data-target=\"#equipmentModify".$equipmentid."\">Edit</button>&nbsp;";
+                $deleteButton = "<button class=\"btn btn-sm btn-danger\" data-toggle=\"modal\" data-target=\"#equipmentDelete".$equipmentid."\">Delete</button>&nbsp;";
 
                 echo "                  <tr>";
                 echo "                      <td>$equipmentid</td>";
@@ -647,8 +650,8 @@ class Records {
                 echo "                      <td>$qtyleft</td>";
                 echo "                      <td>$notes</td>";
                 echo "                      <td>$ownerid</td>";
-                echo "                      <td>" . ($qtyleft >= 1 ? $checkoutButton : '');
-                echo                        $qtyleft >= 1 ? $this->printEquipmentModalWindow($equipmentid, 1) : '' . "</td>";
+                echo "                      <td>" . ($qtyleft >= 1 ? $checkoutButton . $deleteButton : '');
+                echo                        $qtyleft >= 1 ? $this->printEquipmentModalWindow($equipmentid, $qtyleft) : '' . "</td>"; // TODO Add Owner ID information
                 echo "                  </tr>";
             }
 
@@ -667,9 +670,9 @@ class Records {
         //  history = 1 means display all returned bikes, 0 means display currently unreturned bikes
 
         if ($history == 1)
-            $stmt = $this->db->prepare('SELECT rentid, equipmentid, sname, sid, dateout, datein, school, timeout, timein, notes FROM equipmentrentals WHERE (datein IS NULL) ORDER BY rentid DESC');
-        else
             $stmt = $this->db->prepare('SELECT rentid, equipmentid, sname, sid, dateout, datein, school, timeout, timein, notes FROM equipmentrentals WHERE (datein IS NOT NULL) ORDER BY rentid DESC');
+        else
+            $stmt = $this->db->prepare('SELECT rentid, equipmentid, sname, sid, dateout, datein, school, timeout, timein, notes FROM equipmentrentals WHERE (datein IS NULL) ORDER BY rentid DESC');
 
         $stmt->execute();
         $stmt->bind_result($rentid, $equipmentid, $sname, $sid, $dateout, $datein, $school, $timeout, $timein, $notes);
@@ -696,7 +699,7 @@ class Records {
 
         // Loop through the associative array and output all results.
         if ($stmt->num_rows == 0)
-            echo "<h4>No bike rentals currently in the database!</h4>";
+            echo "<h4>No equipment rentals currently in the database!</h4>";
         else
         {
             // Print table header
@@ -708,10 +711,10 @@ class Records {
             echo "                      <th>Equipment ID</th>";
             echo "                      <th>Student Name</th>";
             echo "                      <th>Student ID</th>";
-            echo "                      <th>Check Out Date</th>";
-            echo "                      <th>Check In Date</th>";
             echo "                      <th>School</th>";
+            echo "                      <th>Check Out Date</th>";
             echo "                      <th>Check Out Time</th>";
+            echo "                      <th>Check In Date</th>";
             echo "                      <th>Check In Time</th>";
             echo "                      <th>Notes</th>";
             echo "                      <th>Actions</th>";
@@ -729,14 +732,14 @@ class Records {
                 echo "                      <td>$equipmentid</td>";
                 echo "                      <td>$sname</td>";
                 echo "                      <td>$sid</td>";
-                echo "                      <td>" . date('m/d/y', strtotime($dateout)) . "</td>";
-                echo "                      <td>" . date('m/d/y', strtotime($datein)) . "</td>";
                 echo "                      <td>$school</td>";
-                echo "                      <td>" . ($timeout == "0000-00-00" ? 'Unclaimed' : date('m/d/y h:i:s', strtotime($timeout))) . "</td>";
-                echo "                      <td>$timein</td>";
+                echo "                      <td>" . date('m/d/y', strtotime($dateout)) . "</td>";
+                echo "                      <td>" . ( $timeout == NULL ? $timeout : date('h:i:s', strtotime($timeout)) ) . "</td>";
+                echo "                      <td>" . ( $datein == NULL ? $datein : date('m/d/y', strtotime($datein)) ) . "</td>";
+                echo "                      <td>" . ( $timein == "0000-00-00 00:00:00" ? "" : date('h:i:s', strtotime($timein)) ) . "</td>";
                 echo "                      <td>$notes</td>";
                 echo "                      <td>" . ($history != 1 ? $checkinButton : '');
-                echo                        $history != 1 ? $this->printEquipmentModalWindow($equipmentid, 0, $rentid, $sname, $sid, $waiver = 0) : '' . "</td>";
+                echo                        $history != 1 ? $this->printEquipmentModalWindow($equipmentid, 0, $rentid, $sname, $sid, $school, $dateout, $datein, date('h:i:s', strtotime($timeout)), $timein, $notes) : '' . "</td>";
                 echo "                  </tr>";
             }
 
@@ -748,16 +751,93 @@ class Records {
         $stmt->close();
     }
 
+    function checkInEquipment($rentid, $equipmentid, $datein, $timein, $notes) {
+        // Check out the associated bike id with a student
+        //  $rentid = need this since it's primary key
+        //  $bikeid = needed for setting bike data back to available
+        //  $datein = return date
+
+        try {
+            // Begin a transaction
+            $this->db->autocommit(FALSE);
+
+            // First set the availability = 1 in the bike data
+            $stmt = $this->db->prepare('UPDATE equipmentdata SET qtyleft = qtyleft+1 WHERE equipmentid=?');
+            $stmt->bind_param("i", $equipmentid);
+            $stmt->execute();
+            $stmt->close();
+
+            // Then we add an entry to the bike rentals table
+            $stmt = $this->db->prepare('UPDATE equipmentrentals SET datein = ?, timein = ?, notes = ? WHERE rentid = ?');
+            $stmt->bind_param("sssi", $datein, $timein, $notes, $rentid);
+            $stmt->execute();
+            $stmt->close();
+
+            // We commit the transaction because nothing has failed
+            $this->db->commit();
+            $this->db->autocommit(TRUE); // end transaction
+        } catch (Exception $e) {
+            // An exception has been thrown
+            // We must rollback the transaction
+            $db->rollback();
+            $this->db->autocommit(TRUE); // end transaction
+        }
+    }
+
+    function checkOutEquipment($equipmentid, $sname, $sid, $school, $dateout, $timeout) {
+        // Check out the associated equipment id with a student
+        //  $equipmentid = grabbed from the list of equipment after clicking on a button
+        //  $sname = student name
+        //  $sid = student id
+        //  $school
+        //  $dateout = today's date
+        //  $timeout = current time
+
+
+        try {
+            // Begin a transaction
+            $this->db->autocommit(FALSE);
+
+            // First set the availability = 0 in the bike data
+            $stmt = $this->db->prepare('UPDATE equipmentdata SET qtyleft = qtyleft-1 WHERE equipmentid=?');
+            $stmt->bind_param("i", $equipmentid);
+            $stmt->execute();
+            $stmt->close();
+
+            // Then we add an entry to the bike rentals table
+            $stmt = $this->db->prepare('INSERT INTO equipmentrentals (equipmentid, sname, sid, school, dateout, timeout) VALUES (?, ?, ?, ?, ?, ?)');
+            $stmt->bind_param("isisss", $equipmentid, $sname, $sid, $school, $dateout, $timeout);
+            $stmt->execute();
+            $stmt->close();
+
+            // We commit the transaction because nothing has failed
+            $this->db->commit();
+            $this->db->autocommit(TRUE); // end transaction
+        } catch (Exception $e) {
+            // An exception has been thrown
+            // We must rollback the transaction
+            $db->rollback();
+            $this->db->autocommit(TRUE); // end transaction
+        }
+    }
+
     // $available = 1 means display CHECK OUT
     // $available = 0 means display CHECK IN
-    function printEquipmentModalWindow($equipmentid, $available, $rentid = -1, $sname = "", $sid = -1, $waiver = "") {
-        if ($available == 1) {
-            return '    <div class="modal fade" id="equipmentCheckout'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentCheckout'.$equipmentid.'" aria-hidden="true">
+    function printEquipmentModalWindow($equipmentid, $qtyleft, $rentid = -1, $sname = "", $sid = -1, $school = "", $dateout = "", $datein = "", $timeout = "", $timein = "", $notes = "") {
+
+        // time variables for forms
+        $inputDateOut = date('y-m-d');
+        $inputTimeOut = date('h:i:s');
+        $inputDateIn = date('y-m-d');
+        $inputTimeIn = date('h:i:s');
+
+        if ($qtyleft) {
+            $checkout = '    <div class="modal fade" id="equipmentCheckout'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentCheckout'.$equipmentid.'" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                <h4 class="modal-title" id="equipmentLabel">Mudder Bike Checkout Form</h4>
+                                <h4 class="modal-title" id="equipmentLabel">Equipment Rental Checkout Form</h4>
                             </div> <!-- end modal header -->
                             <form action="checkout.php?mode=equipment" method="post" class="form-horizontal" role="form">
                                 <div class="modal-body">
@@ -782,17 +862,25 @@ class Records {
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="inputWaiver" class="col-sm-2 control-label">School</label>
+                                            <label for="inputSchool" class="col-sm-2 control-label">School</label>
                                             <div class="col-sm-10">
                                                 <input type="text" class="form-control" name="inputSchool" id="inputSchool" placeholder="School">
                                             </div>
-                                        </div><!--
+                                        </div>
                                         <div class="form-group">
-                                            <label for="inputNotes" class="col-sm-2 control-label">Notes</label>
+                                            <label for="inputDateOut" class="col-sm-2 control-label">Check Out Date</label>
                                             <div class="col-sm-10">
-                                                <input type="text" class="form-control" name="inputNotes" id="inputNotes" placeholder="Notes">
+                                               <p class="form-control-static">'.$inputDateOut.'</p>
                                             </div>
-                                        </div>-->
+                                            <input type="hidden" name="inputDateOut" value="'.$inputDateOut.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputTimeOut" class="col-sm-2 control-label">Check Out Time</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$inputTimeOut.'</p>
+                                            </div>
+                                            <input type="hidden" name="inputTimeOut" value="'.$inputTimeOut.'" />
+                                        </div>
 
                                 </div> <!-- end modal-body -->
                                 <div class="modal-footer">
@@ -803,15 +891,42 @@ class Records {
                         </div> <!-- end modal content -->
                     </div> <!-- end modal dialog -->
                 </div> <!-- end my myModal -->';
-            } else {
-                return '   <div class="modal fade" id="equipmentCheckin'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentCheckin'.$equipmentid.'" aria-hidden="true">
+                $delete = '    <div class="modal fade" id="equipmentDelete'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentDelete'.$equipmentid.'" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                <h4 class="modal-title" id="equipmentLabel">Mudder Bike Checkin Form</h4>
+                                <h4 class="modal-title" id="equipmentLabel">Confirm Deletion?</h4>
                             </div> <!-- end modal header -->
-                            <form action="checkin.php?mode=mudderbike" method="post" class="form-horizontal" role="form">
+                            <form action="delete.php?mode=equipment" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+                                        <h5>Are you sure you want to delete the following item?</h5>
+                                        <div class="form-group">
+                                            <label for="equipmentid" class="col-sm-4 control-label">Equipment ID</label>
+                                            <div class="col-sm-8">
+                                               <p class="form-control-static">'.$equipmentid.'</p>
+                                            </div>
+                                            <input type="hidden" name="equipmentid" value="'.$equipmentid.'" />
+                                        </div>
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-danger">Delete</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+                return $checkout . $delete;
+            } else {
+                return '   <div class="modal fade" id="equipmentCheckin'.$rentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentCheckin'.$rentid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="equipmentLabel">Equipment Rental Checkin Form</h4>
+                            </div> <!-- end modal header -->
+                            <form action="checkin.php?mode=equipment" method="post" class="form-horizontal" role="form">
                                 <div class="modal-body">
 
                                         <div class="form-group">
@@ -822,7 +937,7 @@ class Records {
                                             <input type="hidden" name="rentid" value="'.$rentid.'" />
                                         </div>
                                         <div class="form-group">
-                                            <label for="equipmentid" class="col-sm-4 control-label">Bike ID</label>
+                                            <label for="equipmentid" class="col-sm-4 control-label">Equipment ID</label>
                                             <div class="col-sm-8">
                                                <p class="form-control-static">'.$equipmentid.'</p>
                                             </div>
@@ -841,40 +956,36 @@ class Records {
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="waiver" class="col-sm-4 control-label">Waiver</label>
+                                            <label for="school" class="col-sm-4 control-label">School</label>
                                             <div class="col-sm-8">
-                                                <p class="form-control-static">'.$waiver.'</p>
+                                                <p class="form-control-static">'.$school.'</p>
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="inputDateIn" class="col-sm-4 control-label">Date In</label>
+                                            <label for="dateout" class="col-sm-4 control-label">Check Out Date</label>
                                             <div class="col-sm-8">
-                                                <input type="text" class="form-control" name="inputDateIn" id="inputDateIn" placeholder="Date of Return, format: yyyy/mm/dd">
+                                                <p class="form-control-static">'.$dateout.'</p>
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="inputStatus" class="col-sm-4 control-label">Status</label>
+                                            <label for="timeout" class="col-sm-4 control-label">Check Out Time</label>
                                             <div class="col-sm-8">
-                                                <input type="text" class="form-control" name="inputStatus" id="inputStatus" placeholder="i.e. Returned">
+                                                <p class="form-control-static">'.$timeout.'</p>
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="inputkeyreturnedto" class="col-sm-4 control-label">Key Returned To</label>
+                                            <label for="inputDateIn" class="col-sm-4 control-label">Check In Time</label>
                                             <div class="col-sm-8">
-                                                <input type="text" class="form-control" name="inputkeyreturnedto" id="inputkeyreturnedto" placeholder="LAC Staff Name">
+                                               <p class="form-control-static">'.$inputDateIn.'</p>
                                             </div>
+                                            <input type="hidden" name="inputDateIn" value="'.$inputDateIn.'" />
                                         </div>
                                         <div class="form-group">
-                                            <label for="inputLate" class="col-sm-4 control-label">Late</label>
+                                            <label for="inputTimeIn" class="col-sm-4 control-label">Check In Time</label>
                                             <div class="col-sm-8">
-                                                <input type="text" class="form-control" name="inputLate" id="inputLate" placeholder="Manual Entry of days late">
+                                               <p class="form-control-static">'.$inputTimeIn.'</p>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="inputPaid" class="col-sm-4 control-label">Paid / Collected By</label>
-                                            <div class="col-sm-8">
-                                                <input type="text" class="form-control" name="inputPaid" id="inputPaid" placeholder="LAC Staff Name">
-                                            </div>
+                                            <input type="hidden" name="inputTimeIn" value="'.$inputTimeIn.'" />
                                         </div>
                                         <div class="form-group">
                                             <label for="inputNotes" class="col-sm-4 control-label">Notes</label>

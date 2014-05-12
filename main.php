@@ -17,85 +17,129 @@
 	</p>
 </div>
 <div class="container">
-<<<<<<< HEAD
-	<h3> This is so kewlllll </h3>
-=======
-	<h3> Display Check in Code here </h3>
+	<h3> Testing code </h3>
 
-<?php /*
 <!-- Button trigger modal -->
-<button class="btn btn-primary" data-toggle="modal" data-target="#bikeCheckout1234">
+<button class="btn btn-primary" data-toggle="modal" data-target="#equipmentCheckout9">
   Checkout
 </button>
 <!-- Button trigger modal -->
-<button class="btn btn-warning" data-toggle="modal" data-target="#bikeCheckin1234">
+<button class="btn btn-warning" data-toggle="modal" data-target="#equipmentCheckin9">
   Checkin
 </button>
+
+<button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#equipmentDelete9">Delete</button>
+
 <?php
-$bikeid = 1234;
+$equipmentid = 9;
+$rentid = 10;
+$sname = "check in name";
+$inputDateOut = date('y-m-d');
+$inputTimeOut = date('h:i:s');
+$inputDateIn = date('y-m-d');
+$inputTimeIn = date('h:i:s');
+$dateout = "today's date";
+$timeout = "check out time";
 
 
-echo'	<div class="modal fade" id="bikeCheckout'.$bikeid.'" tabindex="-1" role="dialog" aria-labelledby="bikeCheckout'.$bikeid.'" aria-hidden="true">
-    				<div class="modal-dialog">
-    					<div class="modal-content">
-    						<div class="modal-header">
-    							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    							<h4 class="modal-title" id="bikeLabel">Mudder Bike Checkout Form</h4>
-    						</div> <!-- end modal header -->
-    						<form action="checkout.php?mode=mudderbike" method="post" class="form-horizontal" role="form">
-    							<div class="modal-body">
-
-    									<div class="form-group">
-    									    <label for="bikeid" class="col-sm-2 control-label">Bike ID</label>
-    									    <div class="col-sm-10">
-    									       <p class="form-control-static">'.$bikeid.'</p>
-    								    	</div>
-                                            <input type="hidden" name="bikeid" value="'.$bikeid.'" />
-    								  	</div>
-    								  	<div class="form-group">
-    								    	<label for="inputName" class="col-sm-2 control-label">Name</label>
-    								    	<div class="col-sm-10">
-    								      		<input type="text" class="form-control" name="inputName" id="inputName" placeholder="Name">
-    								    	</div>
-    								  	</div>
-    								  	<div class="form-group">
-    								    	<label for="inputSID" class="col-sm-2 control-label">ID #</label>
-    								    	<div class="col-sm-10">
-    								      		<input type="text" class="form-control" name="inputSID" id="inputSID" placeholder="Student ID#">
-    								    	</div>
-    								  	</div>
-    								  	<div class="form-group">
-    								    	<label for="inputWaiver" class="col-sm-2 control-label">Waiver</label>
-    								    	<div class="col-sm-10">
-    								      		<input type="text" class="form-control" name="inputWaiver" id="inputWaiver" placeholder="Waiver">
-    								    	</div>
-    								  	</div>
-    								  	<div class="form-group">
-    								    	<label for="inputNotes" class="col-sm-2 control-label">Notes</label>
-    								    	<div class="col-sm-10">
-    								      		<input type="text" class="form-control" name="inputNotes" id="inputNotes" placeholder="Notes">
-    								    	</div>
-    								  	</div>
-
-    							</div> <!-- end modal-body -->
-    							<div class="modal-footer">
-    								<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-    								<button type="submit" name="save" class="btn btn-primary">Save changes</button>
-    							</div> <!-- end modal-footer -->
-    						</form>
-    					</div> <!-- end modal content -->
-    				</div> <!-- end modal dialog -->
-    			</div> <!-- end my myModal -->';
 
 
-echo'   <div class="modal fade" id="bikeCheckin'.$bikeid.'" tabindex="-1" role="dialog" aria-labelledby="bikeCheckin'.$bikeid.'" aria-hidden="true">
+echo'    <div class="modal fade" id="equipmentCheckout'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentCheckout'.$equipmentid.'" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                <h4 class="modal-title" id="bikeLabel">Mudder Bike Checkin Form</h4>
+                                <h4 class="modal-title" id="equipmentLabel">Equipment Rental Checkout Form</h4>
                             </div> <!-- end modal header -->
-                            <form action="checkout.php?mode=mudderbike" method="post" class="form-horizontal" role="form">
+                            <form action="checkout.php?mode=equipment" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="equipmentid" class="col-sm-2 control-label">Equipment ID</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$equipmentid.'</p>
+                                            </div>
+                                            <input type="hidden" name="equipmentid" value="'.$equipmentid.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputName" class="col-sm-2 control-label">Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputName" id="inputName" placeholder="Name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputSID" class="col-sm-2 control-label">ID #</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputSID" id="inputSID" placeholder="Student ID#">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputSchool" class="col-sm-2 control-label">School</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputSchool" id="inputSchool" placeholder="School">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputDateOut" class="col-sm-2 control-label">Check Out Date</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$inputDateOut.'</p>
+                                            </div>
+                                            <input type="hidden" name="inputDateOut" value="'.$inputDateOut.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputTimeOut" class="col-sm-2 control-label">Check Out Time</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$inputTimeOut.'</p>
+                                            </div>
+                                            <input type="hidden" name="inputTimeOut" value="'.$inputTimeOut.'" />
+                                        </div>
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+
+echo'    <div class="modal fade" id="equipmentDelete'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentDelete'.$equipmentid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="equipmentLabel">Confirm Deletion?</h4>
+                            </div> <!-- end modal header -->
+                            <form action="delete.php?mode=equipment" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+                                        <h5>Are you sure you want to delete the following item?</h5>
+                                        <div class="form-group">
+                                            <label for="equipmentid" class="col-sm-4 control-label">Equipment ID</label>
+                                            <div class="col-sm-8">
+                                               <p class="form-control-static">'.$equipmentid.'</p>
+                                            </div>
+                                            <input type="hidden" name="equipmentid" value="'.$equipmentid.'" />
+                                        </div>
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-danger">Delete</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+
+
+echo'   <div class="modal fade" id="equipmentCheckin'.$rentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentCheckin'.$rentid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="equipmentLabel">Equipment Rental Checkin Form</h4>
+                            </div> <!-- end modal header -->
+                            <form action="checkin.php?mode=equipment" method="post" class="form-horizontal" role="form">
                                 <div class="modal-body">
 
                                         <div class="form-group">
@@ -106,11 +150,11 @@ echo'   <div class="modal fade" id="bikeCheckin'.$bikeid.'" tabindex="-1" role="
                                             <input type="hidden" name="rentid" value="'.$rentid.'" />
                                         </div>
                                         <div class="form-group">
-                                            <label for="bikeid" class="col-sm-4 control-label">Bike ID</label>
+                                            <label for="equipmentid" class="col-sm-4 control-label">Equipment ID</label>
                                             <div class="col-sm-8">
-                                               <p class="form-control-static">'.$bikeid.'</p>
+                                               <p class="form-control-static">'.$equipmentid.'</p>
                                             </div>
-                                            <input type="hidden" name="bikeid" value="'.$bikeid.'" />
+                                            <input type="hidden" name="equipmentid" value="'.$equipmentid.'" />
                                         </div>
                                         <div class="form-group">
                                             <label for="sname" class="col-sm-4 control-label">Name</label>
@@ -125,41 +169,37 @@ echo'   <div class="modal fade" id="bikeCheckin'.$bikeid.'" tabindex="-1" role="
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="waiver" class="col-sm-4 control-label">Waiver</label>
+                                            <label for="school" class="col-sm-4 control-label">School</label>
                                             <div class="col-sm-8">
-                                                <p class="form-control-static">'.$waiver.'</p>
+                                                <p class="form-control-static">'.$school.'</p>
                                             </div>
                                         </div>
-    								  	<div class="form-group">
-    								    	<label for="inputDateIn" class="col-sm-4 control-label">Date In</label>
-    								    	<div class="col-sm-8">
-    								      		<input type="text" class="form-control" name="inputDateIn" id="inputDateIn" placeholder="Date of Return, format: mm/dd/yy">
-    								    	</div>
-    								  	</div>
-    								  	<div class="form-group">
-    								    	<label for="inputStatus" class="col-sm-4 control-label">Status</label>
-    								    	<div class="col-sm-8">
-    								      		<input type="text" class="form-control" name="inputStatus" id="inputStatus" placeholder="i.e. Returned">
-    								    	</div>
-    								  	</div>
-    								  	<div class="form-group">
-    								    	<label for="inputkeyreturnedto" class="col-sm-4 control-label">Key Returned To</label>
-    								    	<div class="col-sm-8">
-    								      		<input type="text" class="form-control" name="inputkeyreturnedto" id="inputkeyreturnedto" placeholder="LAC Staff Name">
-    								    	</div>
-    								  	</div>
-    								  	<div class="form-group">
-    								    	<label for="inputLate" class="col-sm-4 control-label">Late</label>
-    								    	<div class="col-sm-8">
-    								      		<input type="text" class="form-control" name="inputLate" id="inputLate" placeholder="Manual Entry of days late">
-    								    	</div>
-    								  	</div>
-    								  	<div class="form-group">
-    								    	<label for="inputPaid" class="col-sm-4 control-label">Paid / Collected By</label>
-    								    	<div class="col-sm-8">
-    								      		<input type="text" class="form-control" name="inputPaid" id="inputPaid" placeholder="LAC Staff Name">
-    								    	</div>
-    								  	</div>
+                                        <div class="form-group">
+                                            <label for="dateout" class="col-sm-4 control-label">Check Out Date</label>
+                                            <div class="col-sm-8">
+                                                <p class="form-control-static">'.$dateout.'</p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="timeout" class="col-sm-4 control-label">Check Out Time</label>
+                                            <div class="col-sm-8">
+                                                <p class="form-control-static">'.$timeout.'</p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputDateIn" class="col-sm-4 control-label">Check In Time</label>
+                                            <div class="col-sm-8">
+                                               <p class="form-control-static">'.$inputDateIn.'</p>
+                                            </div>
+                                            <input type="hidden" name="inputDateIn" value="'.$inputDateIn.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputTimeIn" class="col-sm-4 control-label">Check In Time</label>
+                                            <div class="col-sm-8">
+                                               <p class="form-control-static">'.$inputTimeIn.'</p>
+                                            </div>
+                                            <input type="hidden" name="inputTimeIn" value="'.$inputTimeIn.'" />
+                                        </div>
                                         <div class="form-group">
                                             <label for="inputNotes" class="col-sm-4 control-label">Notes</label>
                                             <div class="col-sm-8">
@@ -176,7 +216,7 @@ echo'   <div class="modal fade" id="bikeCheckin'.$bikeid.'" tabindex="-1" role="
                         </div> <!-- end modal content -->
                     </div> <!-- end modal dialog -->
                 </div> <!-- end my myModal -->';
-                ?>
-*/ ?>
->>>>>>> e4b1ecd44c96c2a3f29f743cc4816b0e5e7102c7
+
+?>
+
 </div> <!-- end container -->
