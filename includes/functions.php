@@ -546,6 +546,47 @@ class Records {
             }
     }
 
+    function addEquipmentData($equipmentName, $qtyleft, $notes, $owner = 0) {
+        $stmt = $this->db->prepare('INSERT INTO equipmentdata (name, qtyleft, notes, ownerid) VALUES (?, ?, ?, ?');
+        // Replaces the ? above with the variables passed in, i = integer, s = string
+        $stmt->bind_param("sisi", $equipmentName, $qtyleft, $notes, $owner);
+        $stmt->execute();
+
+        $stmt->close();
+    }
+
+    function modifyEquipmentData($equipmentid, $equipmentName, $qtyleft, $notes, $owner) {
+        // Prepare update modified variables
+        $stmt = $this->db->prepare('UPDATE equipmentdata SET name=?, qtyleft=?, notes=?, owner=? WHERE equipmentid=?');
+        $stmt->bind_param("sisii", $equipmentName, $qtyleft, $notes, $owner, $equipmentid);
+        $stmt->execute();
+
+        $stmt->close();
+    }
+
+    // Delete equipment
+    function deleteEquipmentData($equipmentid) {
+        // Prepare delete statement
+        $stmt = $this->db->prepare('DELETE FROM equipmentdata WHERE equipmentid=?');
+        $stmt->bind_param("i", $equipmentid);
+        $stmt->execute();
+
+        $stmt->close();
+    }
+
+    // Helper function to Grab equipment data first based on equipmentid attribute
+    // (all attributes except equipmentid is passed in by reference)
+    function getEquipmentDataByID($equipmentid, &$equipmentName, &$qtyleft, &$notes, &$owner) {
+        $stmt = $this->db->prepare('SELECT equipmentid, name, qtyleft, notes, owner FROM equipmentdata WHERE equipmentid = ?');
+        $stmt->bind_param("i", $equipmentid);
+        $stmt->execute();
+        $stmt->bind_result($equipmentid, $equipmentName, $qtyleft, $notes, $owner);
+        $stmt->store_result(); // store result set into buffer
+        $stmt->fetch(); //fetch the result into variables
+
+        $stmt->close();
+    }
+
     function listEquipmentData($json, $edit) {
         // Print all existing equipment in database
         //  json = 1 means skip the table output but just display json script
