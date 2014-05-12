@@ -104,11 +104,11 @@ class Records {
         // history = -1 = History of returned items
 
         if ($history == 0) {
-            $stmt = $this->db->prepare('SELECT itemid, item, datelost, datereturned FROM lost ORDER BY datelost DESC');
+            $stmt = $this->db->prepare('SELECT itemid, item, datelost FROM lost ORDER BY datelost DESC');
             $stmt->execute();
             $stmt->bind_result($itemid, $item, $datelost);
         } else if ($history == 1) {
-            $stmt = $this->db->prepare('SELECT itemid, item, datefound, dateclaimed FROM found ORDER BY datefound DESC');
+            $stmt = $this->db->prepare('SELECT itemid, item, datefound FROM found ORDER BY datefound DESC');
             $stmt->execute();
             $stmt->bind_result($itemid, $item, $datefound);
         } else {
@@ -141,7 +141,7 @@ class Records {
 		// Loop through the associative array and output all results.
 		if ($stmt->num_rows == 0)
 			echo "<h4>No Lost and Found items currently in the database!</h4>";
-		else if ($history = 0) {
+		else if ($history == 0) {
 			// Print table header
 			echo "				<div class=\"table-responsive\">";
 			echo "					<table class=\"table table-striped table-hover table-bordered\">";
@@ -169,7 +169,7 @@ class Records {
 				echo "			        	<td>$item</td>";
                 echo "                      <td>" . date('m/d/y', strtotime($datelost)) . "</td>";
                 echo "                      <td>" . $claimButton . $modifyButton . $deleteButton;
-                echo                        $this->printLostAndFoundModalWindow($itemid, $method) . "</td>";
+                echo                        $this->printLostAndFoundModalWindow($itemid, 0, $item, $datelost) . "</td>";
 				echo "			    	</tr>";
 	        }
 
@@ -177,7 +177,7 @@ class Records {
 			echo "			    	</tbody>";
 			echo "				</table>";
 			echo "			</div>";
-    	} else if ($history = 1) {
+    	} else if ($history == 1) {
             // Print table header
             echo "              <div class=\"table-responsive\">";
             echo "                  <table class=\"table table-striped table-hover table-bordered\">";
@@ -205,7 +205,7 @@ class Records {
                 echo "                      <td>$item</td>";
                 echo "                      <td>" . date('m/d/y', strtotime($datefound)) . "</td>";
                 echo "                      <td>" . $claimButton . $modifyButton . $deleteButton;
-                echo                        $this->printLostAndFoundModalWindow($itemid, $method) . "</td>";
+                echo                        $this->printLostAndFoundModalWindow($itemid, 1, $itemname, $datelost) . "</td>";
                 echo "                  </tr>";
             }
 
@@ -213,8 +213,194 @@ class Records {
             echo "                  </tbody>";
             echo "              </table>";
             echo "          </div>";
-        }
+        } else {
+            // Print table header
+            echo "              <div class=\"table-responsive\">";
+            echo "                  <table class=\"table table-striped table-hover table-bordered\">";
+            echo "                  <thead>";
+            echo "                  <tr>";
+            echo "                      <th>Item ID</th>";
+            echo "                      <th>Item Name</th>";
+            echo "                      <th>Date Lost/Found</th>";
+            echo "                      <th>Date Claimed</th>";
+            echo "                      <th>Claim Person</th>";
+            echo "                      <th>Notes</th>";
+            echo "                      <th>Actions</th>";
+            echo "                  </tr>";
+            echo "                  </thead>";
+            echo "                  <tbody>";
+
+            // Print table data by looping through all the rows
+            while ($stmt->fetch()) {
+                // This will loop through all the ids and the HTML will have unique identifiers
+                $modifyButton = "<button class=\"btn btn-sm btn-warning\" data-toggle=\"modal\" data-target=\"#historyModify".$itemid."\">Edit</button>&nbsp;";
+
+                $deleteButton = "<button class=\"btn btn-sm btn-danger\" data-toggle=\"modal\" data-target=\"#historyDelete".$itemid."\">Delete</button>&nbsp;";
+
+                echo "                  <tr>";
+                echo "                      <td>$itemid</td>";
+                echo "                      <td>$item</td>";
+                echo "                      <td>" . date('m/d/y', strtotime($datefound)) . "</td>";
+                echo "                      <td>" . date('m/d/y', strtotime($datereturn)) . "</td>";
+                echo "                      <td>$returnedto</td>";
+                echo "                      <td>" . $modifyButton . $deleteButton;
+                echo                        $this->printLostAndFoundModalWindow($itemid, -1, $itemname, $datelost) . "</td>";
+                echo "                  </tr>";
+            }
         $stmt->close();
+        }
+    }
+
+    function printLostAndFoundModalWindow($itemid, $mode, $itemname, $datelost) {
+        // Lost
+        if ($mode == 0) {
+            $claim = '    <div class="modal fade" id="foundClaim'.$itemid.'" tabindex="-1" role="dialog" aria-labelledby="foundClaim'.$itemid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="lostandfoundLabel">Lost Claim Form</h4>
+                            </div> <!-- end modal header -->
+                            <form action="checkout.php?mode=lostandfound" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="itemid" class="col-sm-2 control-label">Item ID</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$itemid.'</p>
+                                            </div>
+                                            <input type="hidden" name="itemid" value="'.$itemid.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="itemname" class="col-sm-4 control-label">Item Name</label>
+                                            <div class="col-sm-8">
+                                               <p class="form-control-static">'.$itemname.'</p>
+                                            </div>
+                                            <input type="hidden" name="itemname" value="'.$itemname.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="datelost" class="col-sm-4 control-label">Date Lost</label>
+                                            <div class="col-sm-8">
+                                               <p class="form-control-static">'.$datelost.'</p>
+                                            </div>
+                                            <input type="hidden" name="datelost" value="'.$datelost.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputNotes" class="col-sm-2 control-label">Notes</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputNotes" id="inputNotes" placeholder="Notes">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputReturnTo" class="col-sm-2 control-label">Claimed By</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputReturnTo" id="inputReturnTo" placeholder="Claimed By">
+                                            </div>
+                                        </div>
+
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+
+                // Call to helper function for data members based on equipment id
+                // For Modify equipment function
+                $this->getEquipmentDataByID($equipmentid, $equipmentName, $qtyleft, $equipmentNotes, $equipmentOwner);
+
+                $modify = '    <div class="modal fade" id="equipmentModify'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentModify'.$equipmentid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="equipmentLabel">Edit Equipment Data</h4>
+                            </div> <!-- end modal header -->
+                            <form action="modify.php?mode=equipment" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="equipmentid" class="col-sm-2 control-label">Equipment ID</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$equipmentid.'</p>
+                                            </div>
+                                            <input type="hidden" name="equipmentid" value="'.$equipmentid.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputEquipmentName" class="col-sm-2 control-label">Equipment Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentName" id="inputEquipmentName" placeholder="Equipment Name" value="'.$equipmentName.'">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputQtyleft" class="col-sm-2 control-label">Quantity</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputQtyleft" id="inputQtyleft" placeholder="Quantity" value="'.$qtyleft.'">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputEquipmentOwner" class="col-sm-2 control-label">Owner</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentOwner" id="inputEquipmentOwner" placeholder="Owner" value="'.$equipmentOwner.'">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputEquipmentNotes" class="col-sm-2 control-label">Notes</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentNotes" id="inputEquipmentNotes" placeholder="Notes" value="'.$equipmentNotes.'">
+                                            </div>
+                                        </div>
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+
+                $delete = '    <div class="modal fade" id="equipmentDelete'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentDelete'.$equipmentid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="equipmentLabel">Confirm Deletion?</h4>
+                            </div> <!-- end modal header -->
+                            <form action="delete.php?mode=equipment" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+                                        <h5>Are you sure you want to delete the following item?</h5>
+                                        <div class="form-group">
+                                            <label for="equipmentid" class="col-sm-4 control-label">Equipment ID</label>
+                                            <div class="col-sm-8">
+                                               <p class="form-control-static">'.$equipmentid.'</p>
+                                            </div>
+                                            <input type="hidden" name="equipmentid" value="'.$equipmentid.'" />
+                                        </div>
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-danger">Delete</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+            return $checkout . $modify . $delete;
+        }
+        // Found
+        else if ($mode == 1) {
+
+        }
+        // History
+        else {
+
+        }
     }
 
     /***********************************
