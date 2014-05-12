@@ -132,6 +132,69 @@ INSERT INTO equipmentrentals (equipmentid, sname, sid, dateout, school)
 INSERT INTO equipmentrentals (equipmentid, sname, sid, dateout, school)
 	VALUES (6, "Kiwi Fruit", 40163526, "2014-05-04", "PTZ");
 
+/* Lost table */
+CREATE TABLE `zonkey`.`lost` (
+`itemid` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+`item` VARCHAR( 256 ) NOT NULL ,
+`datelost` DATE NOT NULL ,
+`datereturned` DATE NULL
+) ENGINE = INNODB CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+/* Found Table */
+CREATE TABLE `zonkey`.`found` (
+`itemid` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+`item` VARCHAR( 256 ) NOT NULL ,
+`datefound` DATE NOT NULL ,
+`dateclaimed` DATE NULL
+) ENGINE = INNODB CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+/* Customers Table */
+CREATE TABLE `zonkey`.`customers` (
+`sid` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+`name` VARCHAR( 64 ) NOT NULL ,
+`email` VARCHAR( 256 ) NOT NULL ,
+`phone` VARCHAR( 64 ) NOT NULL ,
+`school` VARCHAR( 64 ) NOT NULL
+) ENGINE = INNODB CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+/* Rooms Data */
+CREATE TABLE `zonkey`.`roomsdata` (
+`roomid` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+`name` VARCHAR( 64 ) NOT NULL
+) ENGINE = INNODB CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+/* Room Rentals / Bookings */
+CREATE TABLE `zonkey`.`roomrentals` (
+`rentid` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+`roomid` VARCHAR( 64 ) NOT NULL ,
+`sid` VARCHAR( 256 ) NOT NULL ,
+`checkout` DATE NOT NULL ,
+`timeout` DATETIME NOT NULL ,
+`checkin` DATE ,
+`timein` DATETIME NOT NULL ,
+`notes` TEXT NOT NULL
+) ENGINE = INNODB CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+/* Payment History */
+CREATE TABLE `zonkey`.`payment_history` (
+`pid` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+`sid` VARCHAR( 64 ) NOT NULL,
+`amount` FLOAT NOT NULL,
+`staff` VARCHAR( 64 ) NOT NULL,
+`rentid` INT NOT NULL
+) ENGINE = INNODB CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+/* Banned Customers */
+CREATE TABLE `zonkey`.`banned_customers` (
+`bid` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+`sid` VARCHAR( 64 ) NOT NULL,
+`notes` TEXT,
+`bannedbystaff` VARCHAR( 64 ) NOT NULL,
+`dateunban` DATE NOT NULL
+) ENGINE = INNODB CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+/* Rooms Rentals */
+
 /*
  *
  * OLD STUFF

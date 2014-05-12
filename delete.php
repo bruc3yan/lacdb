@@ -48,13 +48,9 @@ if(isset($_SESSION['user'])) {
         //    $record->checkOutMudderBike($bikeid, $sname, $sid, $waiver, $notes);
 
             // Has been checked out! Now redirecting
-            echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=inmudderbikes".'">';
+        //    echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=inmudderbikes".'">';
         }
         else if (htmlentities($_GET['mode']) == 'equipment') {
-            // echo "bikeid: " . $_POST['bikeid'] . "<br />";
-            // echo "name is: " . $_POST['inputName'] . "<br />";
-            // echo "Student ID: " . $_POST['inputSID'] . "<br />";
-            // echo "Waiver: " . $_POST['inputWaiver'] . "<br />";
             // echo "Equipment ID: " . $_POST['equipmentid'] . "<br />";
 
             // Grab the variables from POST and store locally
@@ -66,7 +62,7 @@ if(isset($_SESSION['user'])) {
             // Perform delete
             $record->deleteEquipmentData($equipmentid);
 
-            // Has been checked out! Now redirecting
+            // Has been deleted! Now redirecting
             echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=outequipment".'">';
         }
     }

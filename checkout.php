@@ -65,6 +65,7 @@ if(isset($_SESSION['user'])) {
 			//$notes = htmlentities($_POST['inputNotes']);
 			$dateout = htmlentities($_POST['inputDateOut']);
 			$timeout = htmlentities($_POST['inputTimeOut']);
+			$timeout = date('Y-m-d h:i:s', strtotime($timeout));
 			//$datein = htmlentities($_POST['inputDateIn']);
 			//$timein = htmlentities($_POST['inputTimeIn']);
 

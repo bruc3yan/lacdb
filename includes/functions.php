@@ -95,13 +95,30 @@ class Records {
         $this->db->close();
     }
 
-    function listLostAndFound($json) {
-    	// Print all items in database
-        $stmt = $this->db->prepare('SELECT itemid, item, datefound, returnedto, datereturn, notes FROM lostandfound ORDER BY datefound ASC');
-        $stmt->execute();
-        $stmt->bind_result($itemid, $item, $datefound, $returnedto, $datereturn, $notes);
-        $stmt->store_result(); // store result set into buffer
+    /***********************************
+    ********** LOST AND FOUND **********
+    ***********************************/
+    function listLostAndFound($json, $history) {
+        // history = 0 = LOST
+        // history = 1 = Found
+        // history = -1 = History of returned items
 
+        if ($history == 0) {
+            $stmt = $this->db->prepare('SELECT itemid, item, datelost, datereturned FROM lost ORDER BY datelost DESC');
+            $stmt->execute();
+            $stmt->bind_result($itemid, $item, $datelost);
+        } else if ($history == 1) {
+            $stmt = $this->db->prepare('SELECT itemid, item, datefound, dateclaimed FROM found ORDER BY datefound DESC');
+            $stmt->execute();
+            $stmt->bind_result($itemid, $item, $datefound);
+        } else {
+            // Print all items in database
+            $stmt = $this->db->prepare('SELECT itemid, item, datefound, returnedto, datereturn, notes FROM lostandfound ORDER BY datefound ASC');
+            $stmt->execute();
+            $stmt->bind_result($itemid, $item, $datefound, $returnedto, $datereturn, $notes);
+        }
+
+        $stmt->store_result(); // store result set into buffer
 
         // JSON variables - prepare array to encode JSON with
         $outerArray = array();
@@ -124,8 +141,7 @@ class Records {
 		// Loop through the associative array and output all results.
 		if ($stmt->num_rows == 0)
 			echo "<h4>No Lost and Found items currently in the database!</h4>";
-		else
-		{
+		else if ($history = 0) {
 			// Print table header
 			echo "				<div class=\"table-responsive\">";
 			echo "					<table class=\"table table-striped table-hover table-bordered\">";
@@ -133,23 +149,27 @@ class Records {
 			echo "			    	<tr>";
 			echo "			        	<th>Item ID</th>";
 			echo "			        	<th>Item Name</th>";
-			echo "			        	<th>Date Found</th>";
-			echo "			        	<th>Returned To</th>";
-			echo "			        	<th>Date Returned</th>";
-			echo "			        	<th>Notes</th>";
+			echo "			        	<th>Date Lost</th>";
+			echo "			        	<th>Actions</th>";
 			echo "			    	</tr>";
 			echo "			    	</thead>";
 			echo "			    	<tbody>";
 
 			// Print table data by looping through all the rows
 	        while ($stmt->fetch()) {
+                // This will loop through all the ids and the HTML will have unique identifiers
+                $claimButton = "<button class=\"btn btn-sm btn-primary\" data-toggle=\"modal\" data-target=\"#lostClaim".$itemid."\">Claim</button>&nbsp;";
+
+                $modifyButton = "<button class=\"btn btn-sm btn-warning\" data-toggle=\"modal\" data-target=\"#lostModify".$itemid."\">Edit</button>&nbsp;";
+
+                $deleteButton = "<button class=\"btn btn-sm btn-danger\" data-toggle=\"modal\" data-target=\"#lostDelete".$itemid."\">Delete</button>&nbsp;";
+
 				echo "			    	<tr>";
 				echo "			        	<td>$itemid</td>";
 				echo "			        	<td>$item</td>";
-				echo "			        	<td>" . date('m/d/y', strtotime($datefound)) . "</td>";
-				echo "			        	<td>$returnedto</td>";
-				echo "			        	<td>" . ($datereturn == "0000-00-00" ? 'Unclaimed' : date('m/d/y', strtotime($datereturn))) . "</td>";
-				echo "			        	<td>$notes</td>";
+                echo "                      <td>" . date('m/d/y', strtotime($datelost)) . "</td>";
+                echo "                      <td>" . $claimButton . $modifyButton . $deleteButton;
+                echo                        $this->printLostAndFoundModalWindow($itemid, $method) . "</td>";
 				echo "			    	</tr>";
 	        }
 
@@ -157,10 +177,49 @@ class Records {
 			echo "			    	</tbody>";
 			echo "				</table>";
 			echo "			</div>";
-    	}
+    	} else if ($history = 1) {
+            // Print table header
+            echo "              <div class=\"table-responsive\">";
+            echo "                  <table class=\"table table-striped table-hover table-bordered\">";
+            echo "                  <thead>";
+            echo "                  <tr>";
+            echo "                      <th>Item ID</th>";
+            echo "                      <th>Item Name</th>";
+            echo "                      <th>Date Found</th>";
+            echo "                      <th>Actions</th>";
+            echo "                  </tr>";
+            echo "                  </thead>";
+            echo "                  <tbody>";
+
+            // Print table data by looping through all the rows
+            while ($stmt->fetch()) {
+                // This will loop through all the ids and the HTML will have unique identifiers
+                $claimButton = "<button class=\"btn btn-sm btn-primary\" data-toggle=\"modal\" data-target=\"#foundClaim".$itemid."\">Claim</button>&nbsp;";
+
+                $modifyButton = "<button class=\"btn btn-sm btn-warning\" data-toggle=\"modal\" data-target=\"#foundModify".$itemid."\">Edit</button>&nbsp;";
+
+                $deleteButton = "<button class=\"btn btn-sm btn-danger\" data-toggle=\"modal\" data-target=\"#foundDelete".$itemid."\">Delete</button>&nbsp;";
+
+                echo "                  <tr>";
+                echo "                      <td>$itemid</td>";
+                echo "                      <td>$item</td>";
+                echo "                      <td>" . date('m/d/y', strtotime($datefound)) . "</td>";
+                echo "                      <td>" . $claimButton . $modifyButton . $deleteButton;
+                echo                        $this->printLostAndFoundModalWindow($itemid, $method) . "</td>";
+                echo "                  </tr>";
+            }
+
+            // Close table
+            echo "                  </tbody>";
+            echo "              </table>";
+            echo "          </div>";
+        }
         $stmt->close();
     }
 
+    /***********************************
+    ********** MUDDER BIKES   **********
+    ***********************************/
     function listMudderBikeRentals($json, $edit, $history) {
     	// Print all bikes in database
     	// 	json = 1 means skip the table output but just display json script
@@ -546,22 +605,27 @@ class Records {
             }
     }
 
-    function addEquipmentData($equipmentName, $qtyleft, $notes, $owner = 0) {
-        $stmt = $this->db->prepare('INSERT INTO equipmentdata (name, qtyleft, notes, ownerid) VALUES (?, ?, ?, ?');
+    /***********************************
+    ********** EQUIPMENTS     **********
+    ***********************************/
+    function addEquipmentData($equipmentName = "Untitled", $qtyleft = 999, $equipmentNotes = "", $equipmentOwner = 0) {
+        $stmt = $this->db->prepare('INSERT INTO equipmentdata (name, qtyleft, notes, ownerid) VALUES (?, ?, ?, ?)');
         // Replaces the ? above with the variables passed in, i = integer, s = string
-        $stmt->bind_param("sisi", $equipmentName, $qtyleft, $notes, $owner);
+        $stmt->bind_param("sisi", $equipmentName, $qtyleft, $equipmentNotes, $equipmentOwner);
         $stmt->execute();
 
         $stmt->close();
+        $this->db->commit();
     }
 
-    function modifyEquipmentData($equipmentid, $equipmentName, $qtyleft, $notes, $owner) {
+    function modifyEquipmentData($equipmentid, $equipmentName, $qtyleft, $equipmentNotes, $equipmentOwner) {
         // Prepare update modified variables
-        $stmt = $this->db->prepare('UPDATE equipmentdata SET name=?, qtyleft=?, notes=?, owner=? WHERE equipmentid=?');
-        $stmt->bind_param("sisii", $equipmentName, $qtyleft, $notes, $owner, $equipmentid);
+        $stmt = $this->db->prepare('UPDATE equipmentdata SET name=?, qtyleft=?, notes=?, ownerid=? WHERE equipmentid=?');
+        $stmt->bind_param("sisii", $equipmentName, $qtyleft, $equipmentNotes, $equipmentOwner, $equipmentid);
         $stmt->execute();
 
         $stmt->close();
+        $this->db->commit();
     }
 
     // Delete equipment // TODO Delete somehow doesn't work
@@ -577,11 +641,11 @@ class Records {
 
     // Helper function to Grab equipment data first based on equipmentid attribute
     // (all attributes except equipmentid is passed in by reference)
-    function getEquipmentDataByID($equipmentid, &$equipmentName, &$qtyleft, &$notes, &$owner) {
-        $stmt = $this->db->prepare('SELECT equipmentid, name, qtyleft, notes, owner FROM equipmentdata WHERE equipmentid = ?');
+    function getEquipmentDataByID($equipmentid, &$equipmentName, &$qtyleft, &$equipmentNotes, &$equipmentOwner) {
+        $stmt = $this->db->prepare('SELECT equipmentid, name, qtyleft, notes, ownerid FROM equipmentdata WHERE equipmentid = ?');
         $stmt->bind_param("i", $equipmentid);
         $stmt->execute();
-        $stmt->bind_result($equipmentid, $equipmentName, $qtyleft, $notes, $owner);
+        $stmt->bind_result($equipmentid, $equipmentName, $qtyleft, $equipmentNotes, $equipmentOwner);
         $stmt->store_result(); // store result set into buffer
         $stmt->fetch(); //fetch the result into variables
 
@@ -630,8 +694,8 @@ class Records {
             echo "                      <th>Equipment ID</th>";
             echo "                      <th>Equipment Name</th>";
             echo "                      <th>Quantity Left</th>";
-            echo "                      <th>Notes</th>";
             echo "                      <th>Owner ID</th>";
+            echo "                      <th>Notes</th>";
             echo "                      <th>Actions</th>";
             echo "                  </tr>";
             echo "                  </thead>";
@@ -639,19 +703,21 @@ class Records {
 
             // Print table data by looping through all the rows
             while ($stmt->fetch()) {
-                // This will loop through all the bikeids and the HTML will have unique identifiers
+                // This will loop through all the ids and the HTML will have unique identifiers
                 $checkoutButton = "<button class=\"btn btn-sm btn-primary\" data-toggle=\"modal\" data-target=\"#equipmentCheckout".$equipmentid."\">Check out</button>&nbsp;";
+
                 $modifyButton = "<button class=\"btn btn-sm btn-warning\" data-toggle=\"modal\" data-target=\"#equipmentModify".$equipmentid."\">Edit</button>&nbsp;";
+
                 $deleteButton = "<button class=\"btn btn-sm btn-danger\" data-toggle=\"modal\" data-target=\"#equipmentDelete".$equipmentid."\">Delete</button>&nbsp;";
 
                 echo "                  <tr>";
                 echo "                      <td>$equipmentid</td>";
                 echo "                      <td>$name</td>";
                 echo "                      <td>$qtyleft</td>";
-                echo "                      <td>$notes</td>";
                 echo "                      <td>$ownerid</td>";
-                echo "                      <td>" . ($qtyleft >= 1 ? $checkoutButton . $deleteButton : '');
-                echo                        $qtyleft >= 1 ? $this->printEquipmentModalWindow($equipmentid, $qtyleft) : '' . "</td>"; // TODO Add Owner ID information
+                echo "                      <td>$notes</td>";
+                echo "                      <td>" . ($qtyleft >= 1 ? $checkoutButton . $modifyButton . $deleteButton : $modifyButton . $deleteButton);
+                echo                        $qtyleft >= 1 ? $this->printEquipmentModalWindow($equipmentid, $qtyleft) : $this->printEquipmentModalWindow($equipmentid, 1) . "</td>";
                 echo "                  </tr>";
             }
 
@@ -660,6 +726,13 @@ class Records {
             echo "              </table>";
             echo "          </div>";
         }
+
+        // Add items to the database!
+        $addButton = "<button class=\"btn btn-sm btn-success\" data-toggle=\"modal\" data-target=\"#equipmentInsert\">Add items.</button>";
+        echo '<p>'. $addButton;
+        echo $this->printAddEquipmentModalWindow();
+        echo '</p>';
+
         $stmt->close();
     }
 
@@ -891,6 +964,63 @@ class Records {
                         </div> <!-- end modal content -->
                     </div> <!-- end modal dialog -->
                 </div> <!-- end my myModal -->';
+
+                // Call to helper function for data members based on equipment id
+                // For Modify equipment function
+                $this->getEquipmentDataByID($equipmentid, $equipmentName, $qtyleft, $equipmentNotes, $equipmentOwner);
+
+                $modify = '    <div class="modal fade" id="equipmentModify'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentModify'.$equipmentid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="equipmentLabel">Edit Equipment Data</h4>
+                            </div> <!-- end modal header -->
+                            <form action="modify.php?mode=equipment" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="equipmentid" class="col-sm-2 control-label">Equipment ID</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$equipmentid.'</p>
+                                            </div>
+                                            <input type="hidden" name="equipmentid" value="'.$equipmentid.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputEquipmentName" class="col-sm-2 control-label">Equipment Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentName" id="inputEquipmentName" placeholder="Equipment Name" value="'.$equipmentName.'">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputQtyleft" class="col-sm-2 control-label">Quantity</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputQtyleft" id="inputQtyleft" placeholder="Quantity" value="'.$qtyleft.'">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputEquipmentOwner" class="col-sm-2 control-label">Owner</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentOwner" id="inputEquipmentOwner" placeholder="Owner" value="'.$equipmentOwner.'">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputEquipmentNotes" class="col-sm-2 control-label">Notes</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentNotes" id="inputEquipmentNotes" placeholder="Notes" value="'.$equipmentNotes.'">
+                                            </div>
+                                        </div>
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+
                 $delete = '    <div class="modal fade" id="equipmentDelete'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentDelete'.$equipmentid.'" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -917,8 +1047,8 @@ class Records {
                         </div> <!-- end modal content -->
                     </div> <!-- end modal dialog -->
                 </div> <!-- end my myModal -->';
-                return $checkout . $delete;
-            } else {
+            return $checkout . $modify . $delete;
+        } else {
                 return '   <div class="modal fade" id="equipmentCheckin'.$rentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentCheckin'.$rentid.'" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -1004,6 +1134,55 @@ class Records {
                     </div> <!-- end modal dialog -->
                 </div> <!-- end my myModal -->';
             }
+    }
+
+    // function for adding equipments to the database
+    function printAddEquipmentModalWindow() {
+
+        return '    <div class="modal fade" id="equipmentInsert" tabindex="-1" role="dialog" aria-labelledby="equipmentInsert" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="equipmentLabel">Add Equipment To the Database</h4>
+                            </div> <!-- end modal header -->
+                            <form action="insert.php?mode=equipment" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="inputEquipmentName" class="col-sm-2 control-label">Equipment Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentName" id="inputEquipmentName" placeholder="Equipment Name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputQtyleft" class="col-sm-2 control-label">Quantity</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputQtyleft" id="inputQtyleft" placeholder="Quantity">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputEquipmentOwner" class="col-sm-2 control-label">Owner</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentOwner" id="inputEquipmentOwner" placeholder="Owner">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputEquipmentNotes" class="col-sm-2 control-label">Notes</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentNotes" id="inputEquipmentNotes" placeholder="Notes">
+                                            </div>
+                                        </div>
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
     }
 
     /*

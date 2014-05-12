@@ -1,12 +1,12 @@
 <?php
 /*
  *
- * Modify file
+ * Insert file
  *
  *
  * Author:  Bruce Yan
  * Updated: May 2014
- * Notes:   Multifunction modify file that should work for all items
+ * Notes:   Multifunction insert file that should work for all items
  *
  */
 
@@ -54,7 +54,7 @@ if(isset($_SESSION['user'])) {
             // echo "Equipment ID: " . $_POST['equipmentid'] . "<br />";
 
             // Grab the variables from POST and store locally
-            $equipmentid = $_POST['equipmentid'];
+            //$equipmentid = $_POST['equipmentid'];
             $inputEquipmentName = $_POST['inputEquipmentName'];
             $inputQtyleft = $_POST['inputQtyleft'];
             $inputEquipmentNotes = $_POST['inputEquipmentNotes'];
@@ -64,9 +64,8 @@ if(isset($_SESSION['user'])) {
             $record = new Records;
 
             // Perform update (this occurs on 2 tables)
-            $record->modifyEquipmentData($equipmentid, $inputEquipmentName, $inputQtyleft, $inputEquipmentNotes, $inputEquipmentOwner);
-
-            // Has been modified! Now redirecting
+            $record->addEquipmentData($inputEquipmentName, $inputQtyleft, $inputEquipmentNotes, $inputEquipmentOwner);
+            // Has been added! Now redirecting
             echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=outequipment".'">';
         }
     }

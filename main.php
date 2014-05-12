@@ -27,7 +27,7 @@
 <button class="btn btn-warning" data-toggle="modal" data-target="#equipmentCheckin9">
   Checkin
 </button>
-
+<button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#equipmentModify9">Modify</button>
 <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#equipmentDelete9">Delete</button>
 
 <?php
@@ -92,6 +92,58 @@ echo'    <div class="modal fade" id="equipmentCheckout'.$equipmentid.'" tabindex
                                                <p class="form-control-static">'.$inputTimeOut.'</p>
                                             </div>
                                             <input type="hidden" name="inputTimeOut" value="'.$inputTimeOut.'" />
+                                        </div>
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+
+echo'    <div class="modal fade" id="equipmentModify'.$equipmentid.'" tabindex="-1" role="dialog" aria-labelledby="equipmentModify'.$equipmentid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="equipmentLabel">Edit Equipment Data</h4>
+                            </div> <!-- end modal header -->
+                            <form action="modify.php?mode=equipment" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="equipmentid" class="col-sm-2 control-label">Equipment ID</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$equipmentid.'</p>
+                                            </div>
+                                            <input type="hidden" name="equipmentid" value="'.$equipmentid.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputEquipmentName" class="col-sm-2 control-label">Equipment Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentName" id="inputEquipmentName" placeholder="Equipment Name" value="'.$equipmentName.'">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputQtyleft" class="col-sm-2 control-label">Quantity</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputQtyleft" id="inputQtyleft" placeholder="Quantity" value="'.$qtyleft.'">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputEquipmentOwner" class="col-sm-2 control-label">Owner</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentOwner" id="inputEquipmentOwner" placeholder="Owner" value="'.$equipmentOwner.'">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputEquipmentNotes" class="col-sm-2 control-label">Notes</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputEquipmentNotes" id="inputEquipmentNotes" placeholder="Notes" value="'.$equipmentNotes.'">
+                                            </div>
                                         </div>
 
                                 </div> <!-- end modal-body -->
