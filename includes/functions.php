@@ -975,7 +975,29 @@ class Records {
             $stmt->execute();
             $stmt->close();
 
-            // Then we add an entry to the bike rentals table
+            // Then we add an entry to the customers table (but first we check to see if user exists already or not)
+
+            // Checking if user exists
+            $stmt = $this->db->prepare('SELECT customerid, sid, name, email, phone, school FROM customers WHERE sid = ?');
+            $stmt->bind_param("i", $sid);
+            $stmt->execute();
+            $stmt->bind_result($customerid, $sid, $sname, $customeremail, $customerphone, $school);
+            $stmt->store_result(); // store result set into buffer
+
+            // This means that no such user by the `sid` exists, we insert him in
+            $school = "HMC"; // Since mudder bike is HMC only!
+            if ($stmt->num_rows == 0) {
+                $stmt = $this->db->prepare('INSERT INTO customers (sid, name, school) VALUES (?, ?, ?)');
+                $stmt->bind_param("iss", $sid, $sname, $school);
+                $stmt->execute();
+                $stmt->close();
+            }
+
+            // If the above != 0, it means that _some_ user with that sid
+            // must exist, we just proceed with inserting into equipment
+            // rentals
+
+            // Finally we add an entry to the bike rentals table
             $stmt = $this->db->prepare('INSERT INTO mudderbikerentals (bikeid, sname, sid, waiver, dateout, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?)');
             $stmt->bind_param("isissss", $bikeid, $sname, $sid, $waiver, $dateout, $status, $notes);
             $stmt->execute();
@@ -1138,6 +1160,7 @@ class Records {
                 </div> <!-- end my myModal -->';
             }
     }
+
 
     /***********************************
     ********** EQUIPMENTS     **********
@@ -1404,13 +1427,34 @@ class Records {
             // Begin a transaction
             $this->db->autocommit(FALSE);
 
-            // First set the availability = 0 in the bike data
+            // First set the availability = 0 in the data
             $stmt = $this->db->prepare('UPDATE equipmentdata SET qtyleft = qtyleft-1 WHERE equipmentid=?');
             $stmt->bind_param("i", $equipmentid);
             $stmt->execute();
             $stmt->close();
 
-            // Then we add an entry to the bike rentals table
+            // Then we add an entry to the customers table (but first we check to see if user exists already or not)
+
+            // Checking if user exists
+            $stmt = $this->db->prepare('SELECT customerid, sid, name, email, phone, school FROM customers WHERE sid = ?');
+            $stmt->bind_param("i", $sid);
+            $stmt->execute();
+            $stmt->bind_result($customerid, $sid, $sname, $customeremail, $customerphone, $school);
+            $stmt->store_result(); // store result set into buffer
+
+            // This means that no such user by the `sid` exists, we insert him in
+            if ($stmt->num_rows == 0) {
+                $stmt = $this->db->prepare('INSERT INTO customers (sid, name, school) VALUES (?, ?, ?)');
+                $stmt->bind_param("iss", $sid, $sname, $school);
+                $stmt->execute();
+                $stmt->close();
+            }
+
+            // If the above != 0, it means that _some_ user with that sid
+            // must exist, we just proceed with inserting into equipment
+            // rentals
+
+            // Finally we add an entry to the rentals table
             $stmt = $this->db->prepare('INSERT INTO equipmentrentals (equipmentid, sname, sid, school, dateout, timeout) VALUES (?, ?, ?, ?, ?, ?)');
             $stmt->bind_param("isisss", $equipmentid, $sname, $sid, $school, $dateout, $timeout);
             $stmt->execute();
@@ -1718,7 +1762,9 @@ class Records {
                 </div> <!-- end my myModal -->';
     }
 
-    /*
+    /***********************************
+    ********** ROOMS     ***************
+    ***********************************/
 
      function listCheckedRooms($json, $edit, $history) {
     	// Print all items in database
@@ -1799,7 +1845,7 @@ class Records {
 			echo "			</div>";
     	}
         $stmt->close();
-    }*/
+    }
 
 } //end Records
 
