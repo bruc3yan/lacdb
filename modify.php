@@ -69,6 +69,37 @@ if(isset($_SESSION['user'])) {
             // Has been modified! Now redirecting
             echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=outequipment".'">';
         }
+        else if (htmlentities($_GET['mode']) == 'lost') {
+            // Grab the variables from POST and store locally
+            $itemid = $_POST['itemid'];
+            $inputItemName = $_POST['inputItemName'];
+            $inputDateLost = $_POST['inputDateLost'];
+            $inputItemDescription = $_POST['inputItemDescription'];
+
+            // create a new instance of the Records class
+            $record = new Records;
+
+            // Perform update (this occurs on 2 tables)
+            $record->modifyLostAndFoundData(0, $itemid, $inputItemName, $inputDateLost, $inputItemDescription);
+
+            // Has been modified! Now redirecting
+            echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=lostandfound".'">';
+        }
+        else if (htmlentities($_GET['mode']) == 'found') {
+            // Grab the variables from POST and store locally
+            $itemid = $_POST['itemid'];
+            $inputItemName = $_POST['inputItemName'];
+            $inputDateFound = $_POST['inputDateFound'];
+
+            // create a new instance of the Records class
+            $record = new Records;
+
+            // Perform update (this occurs on 2 tables)
+            $record->modifyLostAndFoundData(1, $itemid, $inputItemName, $inputDateFound);
+
+            // Has been modified! Now redirecting
+            echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=lostandfound".'">';
+        }
     }
 
 // Otherwise if not logged in, redirect to Login page!

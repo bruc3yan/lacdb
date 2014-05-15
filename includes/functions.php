@@ -104,22 +104,25 @@ class Records {
         // history = -1 = History of returned items
 
         if ($history == 0) {
-            $stmt = $this->db->prepare('SELECT itemid, item, datelost FROM lost ORDER BY datelost DESC');
+            // Print all Lost items
+            $stmt = $this->db->prepare('SELECT itemid, item, datelost, description FROM lost ORDER BY datelost DESC');
             $stmt->execute();
-            $stmt->bind_result($itemid, $item, $datelost);
+            $stmt->bind_result($itemid, $item, $datelost, $description);
         } else if ($history == 1) {
+            // Print all Found items
             $stmt = $this->db->prepare('SELECT itemid, item, datefound FROM found ORDER BY datefound DESC');
             $stmt->execute();
             $stmt->bind_result($itemid, $item, $datefound);
         } else {
-            // Print all items in database
-            $stmt = $this->db->prepare('SELECT itemid, item, datefound, returnedto, datereturn, notes FROM lostandfound ORDER BY datefound ASC');
+            // Print all history in database
+            $stmt = $this->db->prepare('SELECT itemid, item, datefound, returnedto, datereturn, notes, category FROM lostandfound ORDER BY datefound ASC');
             $stmt->execute();
-            $stmt->bind_result($itemid, $item, $datefound, $returnedto, $datereturn, $notes);
+            $stmt->bind_result($itemid, $item, $datefound, $returnedto, $datereturn, $notes, $category);
         }
 
         $stmt->store_result(); // store result set into buffer
 
+        /*
         // JSON variables - prepare array to encode JSON with
         $outerArray = array();
 
@@ -128,7 +131,7 @@ class Records {
         if ($json == 1) {
             // Loop through each statement to grab columns and data
             while ($stmt->fetch()) {
-                $loopArray = array('itemid' => $itemid, 'item' => $item, 'datefound' => $datefound, 'returnedto' => $returnedto, 'datereturn' => $datereturn, 'notes' => $notes);
+                $loopArray = array('itemid' => $itemid, 'item' => $item, 'datefound' => $datefound, 'returnedto' => $returnedto, 'datereturn' => $datereturn, 'notes' => $notes, 'category' => $category);
                 array_push($outerArray, $loopArray);
             }
 
@@ -137,6 +140,7 @@ class Records {
             echo json_encode($returnArray);
             exit;
         }
+        */
 
 		// Loop through the associative array and output all results.
 		if ($stmt->num_rows == 0)
@@ -150,6 +154,7 @@ class Records {
 			echo "			        	<th>Item ID</th>";
 			echo "			        	<th>Item Name</th>";
 			echo "			        	<th>Date Lost</th>";
+            echo "                      <th>Description</th>";
 			echo "			        	<th>Actions</th>";
 			echo "			    	</tr>";
 			echo "			    	</thead>";
@@ -168,8 +173,9 @@ class Records {
 				echo "			        	<td>$itemid</td>";
 				echo "			        	<td>$item</td>";
                 echo "                      <td>" . date('m/d/y', strtotime($datelost)) . "</td>";
+                echo "                      <td>$description</td>";
                 echo "                      <td>" . $claimButton . $modifyButton . $deleteButton;
-                echo                        $this->printLostAndFoundModalWindow($itemid, 0, $item, $datelost) . "</td>";
+                echo                        $this->printLostAndFoundModalWindow($itemid, 0, $item, $datelost, $description) . "</td>";
 				echo "			    	</tr>";
 	        }
 
@@ -177,6 +183,12 @@ class Records {
 			echo "			    	</tbody>";
 			echo "				</table>";
 			echo "			</div>";
+
+            // Add items to the lost database!
+            $addLostButton = "<button class=\"btn btn-sm btn-success\" data-toggle=\"modal\" data-target=\"#lostInsert\">Add Lost items</button>";
+            echo '<p>'. $addLostButton;
+            echo $this->printAddLostAndFoundModalWindow(0);
+            echo '</p>';
     	} else if ($history == 1) {
             // Print table header
             echo "              <div class=\"table-responsive\">";
@@ -213,6 +225,12 @@ class Records {
             echo "                  </tbody>";
             echo "              </table>";
             echo "          </div>";
+
+            // Add items to the found database!
+            $addFoundButton = "<button class=\"btn btn-sm btn-success\" data-toggle=\"modal\" data-target=\"#foundInsert\">Add Found items</button>";
+            echo '<p>'. $addFoundButton;
+            echo $this->printAddLostAndFoundModalWindow(1);
+            echo '</p>';
         } else {
             // Print table header
             echo "              <div class=\"table-responsive\">";
@@ -225,6 +243,7 @@ class Records {
             echo "                      <th>Date Claimed</th>";
             echo "                      <th>Claim Person</th>";
             echo "                      <th>Notes</th>";
+            echo "                      <th>Category</th>";
             echo "                  </tr>";
             echo "                  </thead>";
             echo "                  <tbody>";
@@ -243,6 +262,7 @@ class Records {
                 echo "                      <td>" . date('m/d/y', strtotime($datereturn)) . "</td>";
                 echo "                      <td>$returnedto</td>";
                 echo "                      <td>$notes</td>";
+                echo "                      <td>$category</td>";
                 echo "                  </tr>";
             }
 
@@ -254,17 +274,151 @@ class Records {
         $stmt->close();
     }
 
-    function printLostAndFoundModalWindow($itemid, $mode, $itemname, $date) {
+    // Mode
+    //  0 = Lost
+    //  1 = Found
+    function addLostAndFoundData($mode, $itemName, $date, $itemDescription = "") {
         // Lost
         if ($mode == 0) {
-            $claim = '    <div class="modal fade" id="lostClaim'.$itemid.'" tabindex="-1" role="dialog" aria-labelledby="lostClaim'.$itemid.'" aria-hidden="true">
+            $stmt = $this->db->prepare('INSERT INTO lost (item, datelost, description) VALUES (?, ?, ?)');
+           // Replaces the ? above with the variables passed in, i = integer, s = string
+            $stmt->bind_param("sss", $itemName, $date, $itemDescription);
+        }
+        // Found
+        else {
+            $stmt = $this->db->prepare('INSERT INTO found (item, datefound) VALUES (?, ?)');
+            // Replaces the ? above with the variables passed in, i = integer, s = string
+            $stmt->bind_param("ss", $itemName, $date);
+        }
+
+        $stmt->execute();
+
+        $stmt->close();
+        $this->db->commit();
+    }
+
+    // Mode
+    //  0 = Lost
+    //  1 = Found
+    function modifyLostAndFoundData($mode, $itemid, $itemName, $date, $itemDescription = "") {
+        // Lost
+        if ($mode == 0) {
+            // Prepare update modified variables
+            $stmt = $this->db->prepare('UPDATE lost SET lost.item=?, lost.datelost=?, lost.description=? WHERE lost.itemid=?');
+            $stmt->bind_param("sssi", $itemName, $date, $itemDescription, $itemid);
+        }
+        // Found
+        else {
+            // Prepare update modified variables
+            $stmt = $this->db->prepare('UPDATE found SET found.item=?, found.datefound=? WHERE found.itemid=?');
+            $stmt->bind_param("ssi", $itemName, $date, $itemid);
+        }
+
+        $stmt->execute();
+
+        $stmt->close();
+        $this->db->commit();
+    }
+
+    // Mode
+    //  0 = Lost
+    //  1 = Found
+    function deleteLostAndFoundData($mode, $itemid) {
+        // Lost
+        if ($mode == 0) {
+            // Prepare delete statement
+            $stmt = $this->db->prepare('DELETE FROM zonkey.lost WHERE lost.itemid=?');
+            $stmt->bind_param("i", $itemid);
+        }
+        // Found
+        else {
+            // Prepare delete statement
+            $stmt = $this->db->prepare('DELETE FROM zonkey.found WHERE found.itemid=?');
+            $stmt->bind_param("i", $itemid);
+        }
+        $stmt->execute();
+
+        $stmt->close();
+        $this->db->commit();
+    }
+
+    // Mode
+    //  0 = Lost
+    //  1 = Found
+    function claimLostAndFoundData($mode, $itemid, $itemname, $date, $dateclaim, $notes, $returnto) {
+        // Lost
+        if ($mode == 0) {
+            $category = "Lost";
+            try {
+                // Begin a transaction
+                $this->db->autocommit(FALSE);
+
+                // Prepare lost delete statement
+                $stmt = $this->db->prepare('DELETE FROM zonkey.lost WHERE lost.itemid=?');
+                $stmt->bind_param("i", $itemid);
+                $stmt->execute();
+                $stmt->close();
+
+                // Then we add an entry to the lostandfound history table
+                $stmt = $this->db->prepare('INSERT INTO lostandfound (item, datefound, returnedto, datereturn, notes, category) VALUES (?, ?, ?, ?, ?, ?)');
+                $stmt->bind_param("ssssss", $itemname, $date, $returnto, $dateclaim, $notes, $category);
+                $stmt->execute();
+                $stmt->close();
+
+                // We commit the transaction because nothing has failed
+                $this->db->commit();
+                $this->db->autocommit(TRUE); // end transaction
+            } catch (Exception $e) {
+                // An exception has been thrown
+                // We must rollback the transaction
+                $db->rollback();
+                $this->db->autocommit(TRUE); // end transaction
+            }
+        }
+        // Found
+        else if ($mode == 1){
+            $category = "Found";
+            try {
+                // Begin a transaction
+                $this->db->autocommit(FALSE);
+
+                // Prepare found delete statement
+                $stmt = $this->db->prepare('DELETE FROM zonkey.found WHERE found.itemid=?');
+                $stmt->bind_param("i", $itemid);
+                $stmt->execute();
+                $stmt->close();
+
+                // Then we add an entry to the lostandfound history table
+                $stmt = $this->db->prepare('INSERT INTO lostandfound (item, datefound, returnedto, datereturn, notes, category) VALUES (?, ?, ?, ?, ?, ?)');
+                $stmt->bind_param("ssssss", $itemname, $date, $returnto, $dateclaim, $notes, $category);
+                $stmt->execute();
+                $stmt->close();
+
+                // We commit the transaction because nothing has failed
+                $this->db->commit();
+                $this->db->autocommit(TRUE); // end transaction
+            } catch (Exception $e) {
+                // An exception has been thrown
+                // We must rollback the transaction
+                $db->rollback();
+                $this->db->autocommit(TRUE); // end transaction
+            }
+        }
+    }
+
+
+    // For all the Pop up functions like Claim, Edit, and Delete
+    function printLostAndFoundModalWindow($itemid, $mode, $itemname, $date, $itemDescription = "") {
+        // Lost
+        if ($mode == 0) {
+                $claim = '    <div class="modal fade" id="lostClaim'.$itemid.'" tabindex="-1" role="dialog" aria-labelledby="lostClaim'.$itemid.'" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                 <h4 class="modal-title" id="lostandfoundLabel">Lost Claim Form</h4>
                             </div> <!-- end modal header -->
-                            <form action="checkout.php?mode=lostandfound" method="post" class="form-horizontal" role="form">
+                            <form action="checkout.php?mode=lost" method="post" class="form-horizontal" role="form">
                                 <div class="modal-body">
 
                                         <div class="form-group">
@@ -317,13 +471,13 @@ class Records {
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                <h4 class="modal-title" id="equipmentLabel">Edit Lost items</h4>
+                                <h4 class="modal-title" id="lostandfoundLabel">Edit Lost items</h4>
                             </div> <!-- end modal header -->
-                            <form action="modify.php?mode=lostandfound" method="post" class="form-horizontal" role="form">
+                            <form action="modify.php?mode=lost" method="post" class="form-horizontal" role="form">
                                 <div class="modal-body">
 
                                         <div class="form-group">
-                                            <label for="itemid" class="col-sm-2 control-label">Equipment ID</label>
+                                            <label for="itemid" class="col-sm-2 control-label">Item ID</label>
                                             <div class="col-sm-10">
                                                <p class="form-control-static">'.$itemid.'</p>
                                             </div>
@@ -339,6 +493,12 @@ class Records {
                                             <label for="inputDateLost" class="col-sm-2 control-label">Date Lost</label>
                                             <div class="col-sm-10">
                                                 <input type="text" class="form-control" name="inputDateLost" id="inputDateLost" placeholder="Date Lost" value="'.$date.'">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputItemDescription" class="col-sm-2 control-label">Item Description</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputItemDescription" id="inputItemDescription" placeholder="Item Description" value="'.$itemDescription.'">
                                             </div>
                                         </div>
 
@@ -359,7 +519,7 @@ class Records {
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                 <h4 class="modal-title" id="equipmentLabel">Confirm Deletion?</h4>
                             </div> <!-- end modal header -->
-                            <form action="delete.php?mode=lostandfound" method="post" class="form-horizontal" role="form">
+                            <form action="delete.php?mode=lost" method="post" class="form-horizontal" role="form">
                                 <div class="modal-body">
                                         <h5>Are you sure you want to delete the following item?</h5>
                                         <div class="form-group">
@@ -382,14 +542,14 @@ class Records {
         }
         // Found
         else if ($mode == 1) {
-            $claim = '    <div class="modal fade" id="foundClaim'.$itemid.'" tabindex="-1" role="dialog" aria-labelledby="foundClaim'.$itemid.'" aria-hidden="true">
+                $claim = '    <div class="modal fade" id="foundClaim'.$itemid.'" tabindex="-1" role="dialog" aria-labelledby="foundClaim'.$itemid.'" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                 <h4 class="modal-title" id="lostandfoundLabel">Found Claim Form</h4>
                             </div> <!-- end modal header -->
-                            <form action="checkout.php?mode=lostandfound" method="post" class="form-horizontal" role="form">
+                            <form action="checkout.php?mode=found" method="post" class="form-horizontal" role="form">
                                 <div class="modal-body">
 
                                         <div class="form-group">
@@ -443,7 +603,7 @@ class Records {
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                 <h4 class="modal-title" id="equipmentLabel">Edit Found items</h4>
                             </div> <!-- end modal header -->
-                            <form action="modify.php?mode=lostandfound" method="post" class="form-horizontal" role="form">
+                            <form action="modify.php?mode=found" method="post" class="form-horizontal" role="form">
                                 <div class="modal-body">
 
                                         <div class="form-group">
@@ -483,7 +643,7 @@ class Records {
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                 <h4 class="modal-title" id="equipmentLabel">Confirm Deletion?</h4>
                             </div> <!-- end modal header -->
-                            <form action="delete.php?mode=lostandfound" method="post" class="form-horizontal" role="form">
+                            <form action="delete.php?mode=found" method="post" class="form-horizontal" role="form">
                                 <div class="modal-body">
                                         <h5>Are you sure you want to delete the following item?</h5>
                                         <div class="form-group">
@@ -509,6 +669,87 @@ class Records {
             // Nothing to do here
         }
     }
+
+    // For adding Lost (mode == 0) and Found (mode == 1) items to the database
+    function printAddLostAndFoundModalWindow($mode) {
+        // Lost
+        if ($mode == 0) {
+            return '    <div class="modal fade" id="lostInsert" tabindex="-1" role="dialog" aria-labelledby="lostInsert" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h4 class="modal-title" id="lostLabel">Add Lost Items To the Database</h4>
+                                </div> <!-- end modal header -->
+                                <form action="insert.php?mode=lost" method="post" class="form-horizontal" role="form">
+                                    <div class="modal-body">
+
+                                            <div class="form-group">
+                                                <label for="inputItemName" class="col-sm-2 control-label">Item Name</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" name="inputItemName" id="inputItemName" placeholder="Item Name">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="inputDateLost" class="col-sm-2 control-label">Date Lost</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" name="inputDateLost" id="inputDateLost" placeholder="Date Lost (yyyy/mm/dd)">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="inputItemDescription" class="col-sm-2 control-label">Description</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" name="inputItemDescription" id="inputItemDescription" placeholder="Item Contact Description">
+                                                </div>
+                                            </div>
+
+                                    </div> <!-- end modal-body -->
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                        <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                    </div> <!-- end modal-footer -->
+                                </form>
+                            </div> <!-- end modal content -->
+                        </div> <!-- end modal dialog -->
+                    </div> <!-- end my myModal -->';
+        }
+        // Found
+        else if ($mode == 1) {
+            return '    <div class="modal fade" id="foundInsert" tabindex="-1" role="dialog" aria-labelledby="foundInsert" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="foundLabel">Add Found Items To the Database</h4>
+                            </div> <!-- end modal header -->
+                            <form action="insert.php?mode=found" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="inputItemName" class="col-sm-2 control-label">Item Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputItemName" id="inputItemName" placeholder="Item Name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputDateFound" class="col-sm-2 control-label">Date Lost</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputDateFound" id="inputDateFound" placeholder="Date Found (yyyy/mm/dd)">
+                                            </div>
+                                        </div>
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+        }
+    }
+
 
     /***********************************
     ********** MUDDER BIKES   **********
@@ -921,7 +1162,6 @@ class Records {
         $this->db->commit();
     }
 
-    // Delete equipment // TODO Delete somehow doesn't work
     function deleteEquipmentData($equipmentid) {
         // Prepare delete statement
         $stmt = $this->db->prepare('DELETE FROM zonkey.equipmentdata WHERE equipmentdata.equipmentid=?');

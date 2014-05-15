@@ -65,6 +65,32 @@ if(isset($_SESSION['user'])) {
             // Has been deleted! Now redirecting
             echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=outequipment".'">';
         }
+        else if (htmlentities($_GET['mode']) == 'lost') {
+            // Grab the variables from POST and store locally
+            $itemid = $_POST['itemid'];
+
+            // create a new instance of the Records class
+            $record = new Records;
+
+            // Perform delete
+            $record->deleteLostAndFoundData(0, $itemid);
+
+            // Has been deleted! Now redirecting
+            echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=lostandfound".'">';
+        }
+        else if (htmlentities($_GET['mode']) == 'found') {
+            // Grab the variables from POST and store locally
+            $itemid = $_POST['itemid'];
+
+            // create a new instance of the Records class
+            $record = new Records;
+
+            // Perform delete
+            $record->deleteLostAndFoundData(1, $itemid);
+
+            // Has been deleted! Now redirecting
+            echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=lostandfound".'">';
+        }
     }
 
 // Otherwise if not logged in, redirect to Login page!

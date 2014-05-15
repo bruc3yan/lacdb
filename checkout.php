@@ -79,6 +79,62 @@ if(isset($_SESSION['user'])) {
 			// Has been checked out! Now redirecting
 			echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=inequipment".'">';
 		}
+		else if (htmlentities($_GET['mode']) == 'lost') {
+
+			// Grab the variables from POST and store locally
+			$itemid = $_POST['itemid'];
+			$itemname = htmlentities($_POST['itemname']);
+			$inputNotes = htmlentities($_POST['inputNotes']);
+			$datelost = htmlentities($_POST['datelost']);
+			// $dateclaim = date('Y-m-d', strtotime($dateclaim));
+			$dateclaim = date('Y-m-d');
+			$inputReturnTo = htmlentities($_POST['inputReturnTo']);
+
+
+			// echo "itemid: " . $_POST['itemid'] . "<br />";
+			// echo "itemname: " . $_POST['itemname'] . "<br />";
+			// echo "inputNotes: " . $_POST['inputNotes'] . "<br />";
+			// echo "datelost: " . $_POST['datelost'] . "<br />";
+			// echo "inputReturnTo: " . $_POST['inputReturnTo'] . "<br />";
+			// echo "dateclaim: " . $dateclaim . "<br />";
+
+			// create a new instance of the Records class
+			$record = new Records;
+
+			// Perform update (this occurs on 2 tables)
+			$record->claimLostAndFoundData(0, $itemid, $itemname, $datelost, $dateclaim, $inputNotes, $inputReturnTo);
+
+			// Has been checked out! Now redirecting
+			echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=lostandfound".'">';
+		}
+		else if (htmlentities($_GET['mode']) == 'found') {
+
+			// Grab the variables from POST and store locally
+			$itemid = $_POST['itemid'];
+			$itemname = htmlentities($_POST['itemname']);
+			$inputNotes = htmlentities($_POST['inputNotes']);
+			$datefound = htmlentities($_POST['datefound']);
+			// $dateclaim = date('Y-m-d', strtotime($dateclaim));
+			$dateclaim = date('Y-m-d');
+			$inputReturnTo = htmlentities($_POST['inputReturnTo']);
+
+
+			// echo "itemid: " . $_POST['itemid'] . "<br />";
+			// echo "itemname: " . $_POST['itemname'] . "<br />";
+			// echo "inputNotes: " . $_POST['inputNotes'] . "<br />";
+			// echo "datefound: " . $_POST['datefound'] . "<br />";
+			// echo "inputReturnTo: " . $_POST['inputReturnTo'] . "<br />";
+			// echo "dateclaim: " . $dateclaim . "<br />";
+
+			// create a new instance of the Records class
+			$record = new Records;
+
+			// Perform update (this occurs on 2 tables)
+			$record->claimLostAndFoundData(1, $itemid, $itemname, $datefound, $dateclaim, $inputNotes, $inputReturnTo);
+
+			// Has been checked out! Now redirecting
+			echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=lostandfound".'">';
+		}
 	}
 
 // Otherwise if not logged in, redirect to Login page!
