@@ -135,6 +135,37 @@ if(isset($_SESSION['user'])) {
 			// Has been checked out! Now redirecting
 			echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=lostandfound".'">';
 		}
+		else if (htmlentities($_GET['mode']) == 'room') {
+
+			// Grab the variables from POST and store locally
+			$roomid = $_POST['roomid'];
+			$inputSID = htmlentities($_POST['inputSID']);
+			$inputDateOut = htmlentities($_POST['inputDateOut']);
+			$inputTimeOut = htmlentities($_POST['inputTimeOut']);
+			$inputTimeOut = $inputDateOut . " " . $inputTimeOut;
+			$inputDateIn = htmlentities($_POST['inputDateIn']);
+			$inputTimeIn = htmlentities($_POST['inputTimeIn']);
+			$inputTimeIn = $inputDateIn . " " . $inputTimeIn;
+			$inputNotes = htmlentities($_POST['inputNotes']);
+
+			// echo "room id: " . $roomid . "<br />";
+			// echo "inputSID: " . $inputSID . "<br />";
+			// echo "inputDateOut: " . $inputDateOut . "<br />";
+			// echo "inputTimeOut: " . $inputTimeOut . "<br />";
+			// echo "inputDateIn: " . $inputDateIn . "<br />";
+			// echo "inputTimeIn: " . $inputTimeIn . "<br />";
+			// echo "inputNotes: " . $inputNotes . "<br />";
+
+
+			// create a new instance of the Records class
+			$record = new Records;
+
+			// Perform update (this occurs on 2 tables)
+			$record->checkOutRoom($roomid, $inputSID, $inputDateOut, $inputTimeOut, $inputDateIn, $inputTimeIn, $inputNotes);
+
+			// Has been checked out! Now redirecting
+			echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=inrooms".'">';
+		}
 	}
 
 // Otherwise if not logged in, redirect to Login page!

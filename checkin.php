@@ -96,6 +96,20 @@ if(isset($_SESSION['user'])) {
 			// Has been checked out! Now redirecting
 			echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=inequipment".'">';
 		}
+		else if (htmlentities($_GET['mode']) == 'room') {
+			// Grab the variables from POST and store locally
+			$rentid = $_POST['rentid'];
+			$notes = htmlentities($_POST['inputNotes']);
+
+			// create a new instance of the Records class
+			$record = new Records;
+
+			// Perform update (this occurs on 2 tables)
+			$record->checkInRoom($rentid, $notes);
+
+			// Has been checked out! Now redirecting
+			echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=inrooms".'">';
+		}
 	}
 
 // Otherwise if not logged in, redirect to Login page!

@@ -2,12 +2,12 @@
 /*
  *
  * Header File
- * 
- * 
+ *
+ *
  * Author:  Bruce Yan
  * Updated: April 2014
  * Notes:	Modular Header file include
- * 
+ *
  */
 
 // Checks to see if the global page is set
@@ -30,7 +30,7 @@ $page = (isset($_GET['page']) ? htmlentities($_GET['page']) : 'main');
 		<div class="navbar-collapse collapse" id="navbar-collapse-1">
 			<ul class="nav navbar-nav">
 				<li<?php echo ($page == 'main' ? ' class="active">' : ($page == '' ? ' class="active">' : '>')) ?>
-					<a href="<?php echo "?page=main"; ?>">Overdues</a>
+					<a href="<?php echo "?page=main"; ?>">Main</a>
 				</li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Check In <span class="caret"></a>
@@ -71,7 +71,7 @@ $page = (isset($_GET['page']) ? htmlentities($_GET['page']) : 'main');
 					<button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
 				</div>
 			</form> <!-- end navbar-form -->
-			*/ ?>	
+			*/ ?>
 			<ul class="nav navbar-nav navbar-right">
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> My Account <span class="caret"></span></a>

@@ -1766,19 +1766,128 @@ class Records {
     ********** ROOMS     ***************
     ***********************************/
 
-     function listCheckedRooms($json, $edit, $history) {
-    	// Print all items in database
-    	// 	json = 1 means skip the table output but just display json script
-    	//  edit = 1 means certain boxes appear for editing
-    	//  history = 1 means display all returned bikes, 0 means display currently unreturned bikes
+    function addRoomData($roomName) {
+        $stmt = $this->db->prepare('INSERT INTO roomsdata (name) VALUES (?)');
+        // Replaces the ? above with the variables passed in, i = integer, s = string
+        $stmt->bind_param("s", $roomName);
+        $stmt->execute();
 
-    	if ($history == 1)
-    		$stmt = $this->db->prepare('SELECT * FROM rooms WHERE (status LIKE \'%return%\' OR status LIKE \'%late%\')ORDER BY rentid DESC');
-    	else
-    		$stmt = $this->db->prepare('SELECT * FROM rooms WHERE (status NOT LIKE \'%return%\' AND status NOT LIKE \'%late%\') ORDER BY rentid DESC');
+        $stmt->close();
+        $this->db->commit();
+    }
+
+    function modifyRoomData($roomid, $name) {
+        // Prepare update modified variables
+        $stmt = $this->db->prepare('UPDATE roomsdata SET name=? WHERE roomid=?');
+        $stmt->bind_param("si", $name, $roomid);
+        $stmt->execute();
+
+        $stmt->close();
+        $this->db->commit();
+    }
+
+    function deleteRoomData($roomid) {
+        // Prepare delete statement
+        $stmt = $this->db->prepare('DELETE FROM zonkey.roomsdata WHERE roomsdata.roomid=?');
+        $stmt->bind_param("i", $roomid);
+        $stmt->execute();
+
+        $stmt->close();
+        $this->db->commit();
+    }
+
+    function listRoomsData($json, $edit) {
+        // Print all existing equipment in database
+        //  json = 1 means skip the table output but just display json script
+        //  edit = 1 means certain boxes appear for editing
+
+        $available = 1; // Rooms are always available to check out!
+
+        $stmt = $this->db->prepare('SELECT * FROM roomsdata');
+        $stmt->execute();
+        $stmt->bind_result($roomid, $name);
+        $stmt->store_result(); // store result set into buffer
+
+        // Push the results into JSON format if requested
+        if ($json == 1) {
+            // JSON variables - prepare array to encode JSON with
+            $outerArray = array();
+
+            // Loop through each statement to grab columns and data
+            while ($stmt->fetch()) {
+                $loopArray = array('roomid' => $roomid, 'name' => $name);
+                array_push($outerArray, $loopArray);
+            }
+
+            $returnArray = array("roomdata" => $outerArray);
+
+            echo json_encode($returnArray);
+            exit;
+        }
+
+        // Loop through the associative array and output all results.
+        // If no data exists
+        if ($stmt->num_rows == 0)
+            echo "<h4>No room data currently in the database!</h4>";
+        // Print all results if data exists
+        else
+        {
+            // Print table header
+            echo "              <div class=\"table-responsive\">";
+            echo "                  <table class=\"table table-striped table-hover table-bordered\">";
+            echo "                  <thead>";
+            echo "                  <tr>";
+            echo "                      <th>Room ID</th>";
+            echo "                      <th>Room Name</th>";
+            echo "                      <th>Actions</th>";
+            echo "                  </tr>";
+            echo "                  </thead>";
+            echo "                  <tbody>";
+
+            // Print table data by looping through all the rows
+            while ($stmt->fetch()) {
+                // This will loop through all the ids and the HTML will have unique identifiers
+                $checkoutButton = "<button class=\"btn btn-sm btn-primary\" data-toggle=\"modal\" data-target=\"#roomCheckout".$roomid."\">Check out</button>&nbsp;";
+
+                $modifyButton = "<button class=\"btn btn-sm btn-warning\" data-toggle=\"modal\" data-target=\"#roomModify".$roomid."\">Edit</button>&nbsp;";
+
+                $deleteButton = "<button class=\"btn btn-sm btn-danger\" data-toggle=\"modal\" data-target=\"#roomDelete".$roomid."\">Delete</button>&nbsp;";
+
+                echo "                  <tr>";
+                echo "                      <td>$roomid</td>";
+                echo "                      <td>$name</td>";
+                echo "                      <td>" . $checkoutButton . $modifyButton . $deleteButton . $this->printRoomModalWindow($roomid, $available, $name) . "</td>";
+                echo "                  </tr>";
+            }
+
+            // Close table
+            echo "                  </tbody>";
+            echo "              </table>";
+            echo "          </div>";
+        }
+
+        // Add items to the database!
+        $addButton = "<button class=\"btn btn-sm btn-success\" data-toggle=\"modal\" data-target=\"#roomInsert\">Add rooms</button>";
+        echo '<p>'. $addButton;
+        echo $this->printAddRoomModalWindow();
+        echo '</p>';
+
+        $stmt->close();
+    }
+
+    function listRoomRentals($json, $edit, $history) {
+        // Print all equipment rentals in database
+        //  json = 1 means skip the table output but just display json script
+        //  edit = 1 means certain boxes appear for editing
+        //  history = 1 means display all returned bikes, 0 means display currently unreturned bikes
+
+        if ($history == 1)
+            $stmt = $this->db->prepare('SELECT rentid, roomid, sid, checkout, timeout, checkin, timein, notes, status FROM roomrentals WHERE (status IS NOT NULL) ORDER BY rentid DESC');
+        else
+            $stmt = $this->db->prepare('SELECT rentid, roomid, sid, checkout, timeout, checkin, timein, notes, status FROM roomrentals WHERE (status IS NULL) ORDER BY rentid DESC');
 
         $stmt->execute();
-        $stmt->bind_result($rid, $name, $status, $reservDate, $duration, $contactName, $description);
+        $stmt->bind_result($rentid, $roomid, $sid, $checkout, $timeout, $checkin, $timein, $notes, $status);
         $stmt->store_result(); // store result set into buffer
 
 
@@ -1790,62 +1899,350 @@ class Records {
         if ($json == 1) {
             // Loop through each statement to grab columns and data
             while ($stmt->fetch()) {
-                $loopArray = array('rid' => $rid, 'name' => $name, 'status' => $status, 'reservDate' => $reservDate, 'duration' => $duration, 'contactName' => $contactName, 'description' => $description);
+                $loopArray = array('rentid' => $rentid, 'roomid' => $roomid, 'sid' => $sid, 'checkout' => $checkout, 'timeout' => $timeout, 'checkin' => $checkin, 'timein' => $timein, 'notes' => $notes);
                 array_push($outerArray, $loopArray);
             }
 
-            $returnArray = array("Room Reservation" => $outerArray);
+            $returnArray = array("equipmentrentals" => $outerArray);
 
             echo json_encode($returnArray);
             exit;
         }
 
-		// Loop through the associative array and output all results.
-		if ($stmt->num_rows == 0)
-			echo "<h4>No room for reservation currently in the database!</h4>";
-		else
-		{
-			// Print table header
-			echo "				<div class=\"table-responsive\">";
-			echo "					<table class=\"table table-striped table-hover table-bordered\">";
-			echo "			    	<thead>";
-			echo "			    	<tr>";
-			echo "			        	<th>Room ID</th>";
-			echo "			        	<th>Room Name</th>";
-			echo "			        	<th>Status</th>";
-			echo "			        	<th>Reservation Date</th>";
-			echo "			        	<th>Duration</th>";
-			echo "			        	<th>Contact Name</th>";
-			echo "			        	<th>Description</th>";
-			echo "			    	</tr>";
-			echo "			    	</thead>";
-			echo "			    	<tbody>";
+        // Loop through the associative array and output all results.
+        if ($stmt->num_rows == 0)
+            echo "<h4>No equipment rentals currently in the database!</h4>";
+        else
+        {
+            // Print table header
+            echo "              <div class=\"table-responsive\">";
+            echo "                  <table class=\"table table-striped table-hover table-bordered\">";
+            echo "                  <thead>";
+            echo "                  <tr>";
+            echo "                      <th>Rental ID</th>";
+            echo "                      <th>Room ID</th>";
+            echo "                      <th>Student ID</th>";
+            echo "                      <th>Check Out Date</th>";
+            echo "                      <th>Check Out Time</th>";
+            echo "                      <th>Check In Date</th>";
+            echo "                      <th>Check In Time</th>";
+            echo "                      <th>Notes</th>";
+            echo "                      <th>Actions</th>";
+            echo "                  </tr>";
+            echo "                  </thead>";
+            echo "                  <tbody>";
 
-			// Print table data by looping through all the rows
-	        while ($stmt->fetch()) {
+            // Print table data by looping through all the rows
+            while ($stmt->fetch()) {
                 // This will loop through all the bikeids and the HTML will have unique identifiers
-                $checkinButton = "<button class=\"btn btn-sm btn-success\" data-toggle=\"modal\" data-target=\"#bikeCheckin".$bikeid."\">Check In</button>";
+                $deactivateButton = "<button class=\"btn btn-sm btn-success\" data-toggle=\"modal\" data-target=\"#roomDeactivate".$rentid."\">Release!</button>";
 
-				echo "			    	<tr>";
-				echo "			        	<td>$rid</td>";
-				echo "			        	<td>$name</td>";
-				echo "			        	<td>$status</td>";
-				echo "			        	<td>" . date('m/d/y', strtotime($reservDate)) . "</td>";
-				echo "			        	<td>$duration</td>";
-				echo "			        	<td>$contactName</td>";
-				echo "			        	<td>$description</td>";
-                echo "                      <td>" . ($history != 1 ? $checkinButton : '');
-                //echo                        $history != 1 ? $this->printMudderbikeModalWindow($bikeid, 0, $rentid, $sname, $sid, $waiver) : '' . "</td>";
-				echo "			    	</tr>";
-	        }
+                echo "                  <tr>";
+                echo "                      <td>$rentid</td>";
+                echo "                      <td>$roomid</td>";
+                echo "                      <td>$sid</td>";
+                echo "                      <td>" . date('m/d/y', strtotime($checkout)) . "</td>";
+                echo "                      <td>" . date('h:i:s', strtotime($timeout)) . "</td>";
+                echo "                      <td>" . date('m/d/y', strtotime($checkin)) . "</td>";
+                echo "                      <td>" . date('h:i:s', strtotime($timein)) . "</td>";
+                echo "                      <td>$notes</td>";
+                echo "                      <td>" . ($history != 1 ? $deactivateButton : '');
+                echo                        $history != 1 ? $this->printRoomModalWindow($roomid, 0, 0, $rentid, $notes) : '' . "</td>";
+                echo "                  </tr>";
+            }
 
-	        // Close table
-			echo "			    	</tbody>";
-			echo "				</table>";
-			echo "			</div>";
-    	}
+            // Close table
+            echo "                  </tbody>";
+            echo "              </table>";
+            echo "          </div>";
+        }
         $stmt->close();
     }
+
+    function checkInRoom($rentid, $notes) {
+
+        try {
+            // Begin a transaction
+            $this->db->autocommit(FALSE);
+
+            // First set the availability = 1 in the bike data
+            $stmt = $this->db->prepare('UPDATE roomrentals SET status = "" WHERE rentid=?');
+            $stmt->bind_param("i", $rentid);
+            $stmt->execute();
+            $stmt->close();
+
+            // We commit the transaction because nothing has failed
+            $this->db->commit();
+            $this->db->autocommit(TRUE); // end transaction
+        } catch (Exception $e) {
+            // An exception has been thrown
+            // We must rollback the transaction
+            $db->rollback();
+            $this->db->autocommit(TRUE); // end transaction
+        }
+    }
+
+    function checkOutRoom($roomid, $sid, $dateout, $timeout, $datein, $timein, $notes) {
+
+        try {
+            // Begin a transaction
+            $this->db->autocommit(FALSE);
+
+            // First set the availability = 0 in the data
+            // We do NOTHING on the Rooms data!!!
+            /*
+            $stmt = $this->db->prepare('UPDATE equipmentdata SET qtyleft = qtyleft-1 WHERE equipmentid=?');
+            $stmt->bind_param("i", $equipmentid);
+            $stmt->execute();
+            $stmt->close();
+            */
+
+            // Then we add an entry to the customers table (but first we check to see if user exists already or not)
+
+            // Checking if user exists
+            $stmt = $this->db->prepare('SELECT customerid, sid, name, email, phone, school FROM customers WHERE sid = ?');
+            $stmt->bind_param("i", $sid);
+            $stmt->execute();
+            $stmt->bind_result($customerid, $sid, $sname, $customeremail, $customerphone, $school);
+            $stmt->store_result(); // store result set into buffer
+
+            // This means that no such user by the `sid` exists, we insert him in
+            if ($stmt->num_rows == 0) {
+                $stmt = $this->db->prepare('INSERT INTO customers (sid) VALUES (?)');
+                $stmt->bind_param("i", $sid);
+                $stmt->execute();
+                $stmt->close();
+            }
+
+            // If the above != 0, it means that _some_ user with that sid
+            // must exist, we just proceed with inserting into equipment
+            // rentals
+
+            // Finally we add an entry to the rentals table
+            $stmt = $this->db->prepare('INSERT INTO roomrentals (roomid, sid, checkout, timeout, checkin, timein, notes) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $stmt->bind_param("iisssss", $roomid, $sid, $dateout, $timeout, $datein, $timein, $notes);
+            $stmt->execute();
+            $stmt->close();
+
+            // We commit the transaction because nothing has failed
+            $this->db->commit();
+            $this->db->autocommit(TRUE); // end transaction
+        } catch (Exception $e) {
+            // An exception has been thrown
+            // We must rollback the transaction
+            $db->rollback();
+            $this->db->autocommit(TRUE); // end transaction
+        }
+    }
+
+    // $available = 1 means display CHECK OUT
+    // $available = 0 means display CHECK IN
+    function printRoomModalWindow($roomid, $available, $name="", $rentid = -1, $notes ="") {
+
+        // time variables for forms
+        $inputDateOut = date('y-m-d');
+        $inputTimeOut = date('h:i:s');
+        $inputDateIn = date('y-m-d');
+        $inputTimeIn = date('h:i:s');
+
+        if ($available) {
+            $checkout = '    <div class="modal fade" id="roomCheckout'.$roomid.'" tabindex="-1" role="dialog" aria-labelledby="roomCheckout'.$roomid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="roomLabel">Room Rental Checkout Form</h4>
+                            </div> <!-- end modal header -->
+                            <form action="checkout.php?mode=room" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="roomid" class="col-sm-2 control-label">Room ID</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$roomid.'</p>
+                                            </div>
+                                            <input type="hidden" name="roomid" value="'.$roomid.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputSID" class="col-sm-2 control-label">ID #</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputSID" id="inputSID" placeholder="Student ID#">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputDateOut" class="col-sm-2 control-label">Check Out Date</label>
+                                            <div class="col-sm-10">
+                                               <input type="text" class="form-control" name="inputDateOut" id="inputDateOut" placeholder="Date of Check out, format: yyyy-mm-dd">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputTimeOut" class="col-sm-2 control-label">Check Out Time</label>
+                                            <div class="col-sm-10">
+                                               <input type="text" class="form-control" name="inputTimeOut" id="inputTimeOut" placeholder="Time of Check out, format: hh:mm:ss">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputDateIn" class="col-sm-2 control-label">Check In Date</label>
+                                            <div class="col-sm-10">
+                                               <input type="text" class="form-control" name="inputDateIn" id="inputDateIn" placeholder="Date of Check in, format: yyyy-mm-dd">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputTimeIn" class="col-sm-2 control-label">Check In Time</label>
+                                            <div class="col-sm-10">
+                                               <input type="text" class="form-control" name="inputTimeIn" id="inputTimeIn" placeholder="Time of Check In, format: hh:mm:ss">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputNotes" class="col-sm-2 control-label">Notes</label>
+                                            <div class="col-sm-10">
+                                               <input type="text" class="form-control" name="inputNotes" id="inputNotes" placeholder="Notes on this reservation.">
+                                            </div>
+                                        </div>
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+
+                $modify = '    <div class="modal fade" id="roomModify'.$roomid.'" tabindex="-1" role="dialog" aria-labelledby="roomModify'.$roomid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="roomLabel">Edit room Data</h4>
+                            </div> <!-- end modal header -->
+                            <form action="modify.php?mode=room" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="roomid" class="col-sm-2 control-label">Room ID</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$roomid.'</p>
+                                            </div>
+                                            <input type="hidden" name="roomid" value="'.$roomid.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputroomName" class="col-sm-2 control-label">Room Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputroomName" id="inputroomName" placeholder="room Name" value="'.$name.'">
+                                            </div>
+                                        </div>
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+
+                $delete = '    <div class="modal fade" id="roomDelete'.$roomid.'" tabindex="-1" role="dialog" aria-labelledby="roomDelete'.$roomid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="roomLabel">Confirm Deletion?</h4>
+                            </div> <!-- end modal header -->
+                            <form action="delete.php?mode=room" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+                                        <h5>Are you sure you want to delete the following item?</h5>
+                                        <div class="form-group">
+                                            <label for="roomid" class="col-sm-4 control-label">Room ID</label>
+                                            <div class="col-sm-8">
+                                               <p class="form-control-static">'.$roomid.'</p>
+                                            </div>
+                                            <input type="hidden" name="roomid" value="'.$roomid.'" />
+                                        </div>
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-danger">Delete</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+            return $checkout . $modify . $delete;
+        }
+            // currently there's nothing to "check in", just a listing of all
+            // current room reservations
+
+        else {
+                return '   <div class="modal fade" id="roomDeactivate'.$rentid.'" tabindex="-1" role="dialog" aria-labelledby="roomDeactivate'.$rentid.'" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="deactivateLabel">Room Rental Release Form</h4>
+                            </div> <!-- end modal header -->
+                            <form action="checkin.php?mode=room" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="rentid" class="col-sm-2 control-label">Rent ID</label>
+                                            <div class="col-sm-10">
+                                               <p class="form-control-static">'.$rentid.'</p>
+                                            </div>
+                                            <input type="hidden" name="rentid" value="'.$rentid.'" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputNotes" class="col-sm-2 control-label">Room Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputNotes" id="inputNotes" placeholder="Notes" value="'.$notes.'">
+                                            </div>
+                                        </div>
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+            }
+    }
+
+    // function for adding rooms to the database
+    function printAddRoomModalWindow() {
+
+        return '    <div class="modal fade" id="roomInsert" tabindex="-1" role="dialog" aria-labelledby="roomInsert" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="roomLabel">Add Rooms To the Database</h4>
+                            </div> <!-- end modal header -->
+                            <form action="insert.php?mode=room" method="post" class="form-horizontal" role="form">
+                                <div class="modal-body">
+
+                                        <div class="form-group">
+                                            <label for="inputRoomName" class="col-sm-2 control-label">Room Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="inputRoomName" id="inputRoomName" placeholder="Room Name">
+                                            </div>
+                                        </div>
+
+                                </div> <!-- end modal-body -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" name="save" class="btn btn-primary">Save changes</button>
+                                </div> <!-- end modal-footer -->
+                            </form>
+                        </div> <!-- end modal content -->
+                    </div> <!-- end modal dialog -->
+                </div> <!-- end my myModal -->';
+    }
+
 
 } //end Records
 

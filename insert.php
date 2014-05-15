@@ -95,6 +95,18 @@ if(isset($_SESSION['user'])) {
             // Has been added! Now redirecting
             echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=lostandfound".'">';
         }
+        else if (htmlentities($_GET['mode']) == 'room') {
+            // Grab the variables from POST and store locally
+            $inputRoomName = $_POST['inputRoomName'];
+
+            // create a new instance of the Records class
+            $record = new Records;
+
+            // Perform update (this occurs on 2 tables)
+            $record->addRoomData($inputRoomName);
+            // Has been added! Now redirecting
+            echo '<META HTTP-EQUIV=REFRESH CONTENT="0; '."URL=./?page=outrooms".'">';
+        }
     }
 
 // Otherwise if not logged in, redirect to Login page!

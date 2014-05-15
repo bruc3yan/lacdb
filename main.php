@@ -11,12 +11,13 @@
  */
  ?>
 <div class="page-header">
-	<h2>Overdues <small>Current overdues</small></h2>
+	<h2>Main Page <small>Current List of daily LAC Staff Tasks</small></h2>
 	<p class="lead">
-		Current overdues are listed here in reverse chronological order--meaning the most overdue items are always shown at the top.  Clicking on any of the columns will auto-sort the overdues accordingly.
+		Be sure to check back often for daily tasks!
 	</p>
 </div>
 <div class="container">
+<?php /*
 	<h3> Testing code </h3>
 
 <!-- Button trigger modal -->
@@ -28,9 +29,9 @@
   Checkin
 </button>
 <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#equipmentModify9">Modify</button>
-<button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#equipmentDelete9">Delete</button>
+<button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#equipmentDelete9">Delete</button> */ ?>
 
-<?php
+<?php /*
 $equipmentid = 9;
 $rentid = 10;
 $sname = "check in name";
@@ -268,7 +269,7 @@ echo'   <div class="modal fade" id="equipmentCheckin'.$rentid.'" tabindex="-1" r
                         </div> <!-- end modal content -->
                     </div> <!-- end modal dialog -->
                 </div> <!-- end my myModal -->';
-
+*/
 ?>
 
 </div> <!-- end container -->
